@@ -47,23 +47,14 @@ class ProgramMenu:
         while True:
             try:
                 user_input = input(f'===> {self.ui_name.upper()} - Input Option Number: ')
-                if int(user_input) == 0:
-                    return "Back to Main Menu"
-                elif 0 < int(user_input) <= len(self.ui_menu):
+                if 0 < int(user_input) <= len(self.ui_menu):
                     print("")
                     return self.ui_menu[int(user_input) - 1][0]
-                print("!!! Invalid option, select a valid option number !!!")
+                print("Invalid option, select a valid option number")
                 continue
             except ValueError:
-                print("!!! Invalid option, select a valid option number !!!")
+                print("Invalid option, select a valid option number")
                 continue
-
-    def inventory_option(self):
-        ...
-
-    def item_option(self):
-        ...
-
 
 class Inventory:
     def __init__(self, inv_name: str, storage: list[list]):
@@ -101,7 +92,7 @@ def main():
         ['Manage Existing Inventory'],
         ['Exit Program']
     ])
-
+    
     # saved_inventories_menu = ProgramMenu("My Inventories")
     selected_option = str
 
@@ -110,7 +101,6 @@ def main():
     print('----- \"A handy inventory management program for your food\" -----\n')
     main_menu.options_table()
     selected_option = main_menu.input_option()
-
     # Options
     match selected_option:
         case "Back to Main Menu":
@@ -120,24 +110,12 @@ def main():
             print("WIP")
         case "Manage Existing Inventory":
             csv_files = list(filter(lambda x: x.endswith(".csv"), list(os.listdir())))
-            csv_files = list(map(lambda x: x.rstrip(".csv"), csv_files))
-            inventory_menu = ProgramMenu("My Inventories", [csv_files])
-            inventory_menu.options_table()
-            inventory_file = inventory_menu.input_option()
-            with open(f"{inventory_file}.csv") as file:
-                my_csv = csv.reader(file)
-                inventory_list = []
-                for row in my_csv:
-                    inventory_list.append(row)
-                print(
-                    tabulate(inventory_list, tablefmt='simple_grid',
-                                headers='firstrow', 
-                                showindex=list(map(lambda x:x+1, list(range(len(inventory_list)-1)))))
-                )
+            ProgramMenu("My Inventories", [csv_files]).options_table()
+            # insert inventory selection here, proceeding to the inventory menu after inventory selection
         case "Exit Program":
             sys.exit("\n|----- Program Closed -----|\n")
         case _:
-            sys.exit("\n|----- PROGRAM ERROR: OPTION MISMATCH -----|\n")
+            sys.exit("\n|----- PROGRAM ERROR, EXITING -----|\n")
 
 
 if __name__ == "__main__":

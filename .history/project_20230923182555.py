@@ -112,32 +112,30 @@ def main():
     selected_option = main_menu.input_option()
 
     # Options
-    match selected_option:
-        case "Back to Main Menu":
-            main_menu.options_table()
-            selected_option = main_menu.input_option()
-        case "New Inventory":
-            print("WIP")
-        case "Manage Existing Inventory":
-            csv_files = list(filter(lambda x: x.endswith(".csv"), list(os.listdir())))
-            csv_files = list(map(lambda x: x.rstrip(".csv"), csv_files))
-            inventory_menu = ProgramMenu("My Inventories", [csv_files])
-            inventory_menu.options_table()
-            inventory_file = inventory_menu.input_option()
-            with open(f"{inventory_file}.csv") as file:
-                my_csv = csv.reader(file)
-                inventory_list = []
-                for row in my_csv:
-                    inventory_list.append(row)
-                print(
-                    tabulate(inventory_list, tablefmt='simple_grid',
-                                headers='firstrow', 
-                                showindex=list(map(lambda x:x+1, list(range(len(inventory_list)-1)))))
-                )
-        case "Exit Program":
-            sys.exit("\n|----- Program Closed -----|\n")
-        case _:
-            sys.exit("\n|----- PROGRAM ERROR: OPTION MISMATCH -----|\n")
+    while True:
+        match selected_option:
+            case "Back to Main Menu":
+                main_menu.options_table()
+                selected_option = main_menu.input_option()
+            case "New Inventory":
+                print("WIP")
+            case "Manage Existing Inventory":
+                csv_files = list(filter(lambda x: x.endswith(".csv"), list(os.listdir())))
+                csv_files = list(map(lambda x: x.rstrip(".csv"), csv_files))
+                inventory_menu = ProgramMenu("My Inventories", [csv_files])
+                inventory_menu.options_table()
+                inventory_file = inventory_menu.input_option()
+                with open(f"{inventory_file}.csv") as file:
+                    my_csv = csv.reader(file)
+                    inventory
+                    for row in my_csv:
+                        print(row)
+
+            case "Exit Program":
+                sys.exit("\n|----- Program Closed -----|\n")
+            case _:
+                sys.exit("\n|----- PROGRAM ERROR: OPTION MISMATCH -----|\n")
+        continue
 
 
 if __name__ == "__main__":

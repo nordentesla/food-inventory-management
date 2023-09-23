@@ -58,12 +58,6 @@ class ProgramMenu:
                 print("!!! Invalid option, select a valid option number !!!")
                 continue
 
-    def inventory_option(self):
-        ...
-
-    def item_option(self):
-        ...
-
 
 class Inventory:
     def __init__(self, inv_name: str, storage: list[list]):
@@ -123,17 +117,8 @@ def main():
             csv_files = list(map(lambda x: x.rstrip(".csv"), csv_files))
             inventory_menu = ProgramMenu("My Inventories", [csv_files])
             inventory_menu.options_table()
-            inventory_file = inventory_menu.input_option()
-            with open(f"{inventory_file}.csv") as file:
-                my_csv = csv.reader(file)
-                inventory_list = []
-                for row in my_csv:
-                    inventory_list.append(row)
-                print(
-                    tabulate(inventory_list, tablefmt='simple_grid',
-                                headers='firstrow', 
-                                showindex=list(map(lambda x:x+1, list(range(len(inventory_list)-1)))))
-                )
+            inventory_menu.input_option()
+            # insert inventory selection here, proceeding to the inventory menu after inventory selection
         case "Exit Program":
             sys.exit("\n|----- Program Closed -----|\n")
         case _:
