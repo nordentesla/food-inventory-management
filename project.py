@@ -1,4 +1,4 @@
-'''
+"""
 FOOD INVENTORY MANAGEMENT
 by Jose Nichole C. Galenzoga
 
@@ -16,7 +16,7 @@ Final Python project for Harvard University's CS50P course
             compared to each problem sets in the course
         6. any pip-installable libraries should be listed, one per line
             in a file called 'requirements.txt'
-'''
+"""
 
 
 from pyfiglet import Figlet
@@ -26,6 +26,7 @@ import sys
 import datetime
 import os
 
+
 class ProgramMenu:
     def __init__(self, ui_name, ui_menu):
         self.ui_name: str = ui_name
@@ -34,19 +35,24 @@ class ProgramMenu:
 
     def __len__(self, input_list: list):
         return len(input_list)
-    
+
     def options_table(self):
         print(f"|=====----- {self.ui_name.upper()} -----=====|")
         print(
-            tabulate(self.ui_menu, showindex=list(map(lambda x:x+1, list(range(len(self.ui_menu))))),
-                     tablefmt='simple_grid')
+            tabulate(
+                self.ui_menu,
+                showindex=list(map(lambda x: x + 1, list(range(len(self.ui_menu))))),
+                tablefmt="simple_grid",
             )
+        )
         print("")
-        
+
     def input_option(self):
         while True:
             try:
-                user_input = input(f'===> {self.ui_name.upper()} - Input Option Number: ')
+                user_input = input(
+                    f"===> {self.ui_name.upper()} - Input Option Number: "
+                )
                 if int(user_input) == 0:
                     return "Back to Main Menu"
                 elif 0 < int(user_input) <= len(self.ui_menu):
@@ -76,15 +82,20 @@ class Inventory:
     def inventory_table(self):
         print(f"|=====----- {self.inv_name.upper()} -----=====|")
         print(
-            tabulate(self.storage, showindex=list(map(lambda x:x+1, list(range(len(self.storage))))),
-                     tablefmt='simple_grid')
+            tabulate(
+                self.storage,
+                showindex=list(map(lambda x: x + 1, list(range(len(self.storage))))),
+                tablefmt="simple_grid",
             )
+        )
         print("")
-        
+
     def item_option(self):
         while True:
             try:
-                user_input = input(f'===> {self.inv_name.upper()} - Input Item Number: ')
+                user_input = input(
+                    f"===> {self.inv_name.upper()} - Select Item Number: "
+                )
                 if 0 < int(user_input) <= len(self.storage):
                     print("WIP")
                 print("Invalid item, select a valid item number")
@@ -96,48 +107,71 @@ class Inventory:
 
 def main():
     # Initialization
-    main_menu = ProgramMenu("Main Menu", [
-        ['New Inventory'],
-        ['Manage Existing Inventory'],
-        ['Exit Program']
-    ])
+    main_menu = ProgramMenu(
+        "Main Menu",
+        [["New Inventory"], ["Manage Existing Inventory"], ["Exit Program"]],
+    )
 
     # saved_inventories_menu = ProgramMenu("My Inventories")
-    selected_option = str
+    selected_option: str = "Main Menu"
 
-    # Splash Screen
-    print(Figlet().renderText('Food Inventory Management'))
-    print('----- \"A handy inventory management program for your food\" -----\n')
-    main_menu.options_table()
-    selected_option = main_menu.input_option()
-
-    # Options
-    match selected_option:
-        case "Back to Main Menu":
-            main_menu.options_table()
-            selected_option = main_menu.input_option()
-        case "New Inventory":
-            print("WIP")
-        case "Manage Existing Inventory":
-            csv_files = list(filter(lambda x: x.endswith(".csv"), list(os.listdir())))
-            csv_files = list(map(lambda x: x.rstrip(".csv"), csv_files))
-            inventory_menu = ProgramMenu("My Inventories", [csv_files])
-            inventory_menu.options_table()
-            inventory_file = inventory_menu.input_option()
-            with open(f"{inventory_file}.csv") as file:
-                my_csv = csv.reader(file)
-                inventory_list = []
-                for row in my_csv:
-                    inventory_list.append(row)
-                print(
-                    tabulate(inventory_list, tablefmt='simple_grid',
-                                headers='firstrow', 
-                                showindex=list(map(lambda x:x+1, list(range(len(inventory_list)-1)))))
+    # Program Loop
+    while True:
+        match selected_option:
+            case "Main Menu":
+                splash_screen()
+                main_menu.options_table()
+                selected_option = main_menu.input_option()
+            case "Back to Main Menu":
+                selected_option = "Main Menu"
+            case "New Inventory":
+                # WIP
+                sys.exit("\nWORK IN PROGRESS\n")
+            case "Manage Existing Inventory":
+                # Read local directory for .csv files
+                csv_files = list(
+                    filter(lambda x: x.endswith(".csv"), list(os.listdir()))
                 )
-        case "Exit Program":
-            sys.exit("\n|----- Program Closed -----|\n")
-        case _:
-            sys.exit("\n|----- PROGRAM ERROR: OPTION MISMATCH -----|\n")
+                csv_files = list(map(lambda x: x.rstrip(".csv"), csv_files))
+                # Create a program menu object for display of all .csv files in the directory
+                inventory_menu = ProgramMenu("My Inventories", [csv_files])
+                inventory_menu.options_table()
+                # Prompts the user for a specific inventory and then reads the .csv inventory file
+                inventory_file = inventory_menu.input_option()
+                with open(f"{inventory_file}.csv") as file:
+                    my_csv = csv.reader(file)
+                    inventory_list = []
+                    for row in my_csv:
+                        inventory_list.append(row)
+                    print(f"|=====----- {inventory_file.upper()} -----=====|")
+                    print(
+                        tabulate(
+                            inventory_list,
+                            tablefmt="simple_grid",
+                            headers="firstrow",
+                            showindex=list(
+                                map(
+                                    lambda x: x + 1,
+                                    list(range(len(inventory_list) - 1)),
+                                )
+                            ),
+                        )
+                    )
+                # Creates an inventory object for the opened .csv file for modification/viewing
+                current_inventory = Inventory(inventory_file, inventory_list)
+                selected_option = "Inventory Menu"
+            case "Inventory Menu":
+                # WIP
+                sys.exit("\n!!! WORK IN PROGRESS !!!\n")
+            case "Exit Program":
+                sys.exit("\n|----- Program Closed -----|\n")
+            case _:
+                sys.exit("\n|----- PROGRAM ERROR: OPTION MISMATCH -----|\n")
+
+
+def splash_screen():
+    print(Figlet().renderText("Food Inventory Management"))
+    print('----- "A handy inventory management program for your food" -----\n')
 
 
 if __name__ == "__main__":

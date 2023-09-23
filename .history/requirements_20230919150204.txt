@@ -1,4 +1,0 @@
-pyfiglet
-re
-csv
-tabulate
