@@ -1,9 +1,7 @@
 # Food Inventory Management
 #### Created by nordentesla
 ### Video Demo 
-Rick Roll
-
-https://www.youtube.com/watch?v=dQw4w9WgXcQ&pp=ygUJcmljayByb2xs
+**! UNDER CONSTRUCTION !**
 
 ### Description
 The program is called **Food Inventory Management**.
