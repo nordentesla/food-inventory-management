@@ -25,6 +25,7 @@ from tabulate import tabulate
 import sys
 import datetime
 import os
+import re
 
 
 class ProgramMenu:
@@ -72,20 +73,30 @@ class ProgramMenu:
 
 
 class Inventory:
-    def __init__(self, inv_name: str, storage: list[list]):
+    def __init__(self, inv_name: str, storage: list[list] = [[]]):
         self.inv_name = inv_name
         self.storage = storage
+        self.filename_with_extension = str
+        self.match = str
 
     def __len__(self, input_list: list):
         return len(input_list)
 
     def inventory_table(self):
+        self.storage = []
+        with open(f"./inventories/{self.inv_name}.csv") as file:
+            my_csv = csv.reader(file)
+            for row in my_csv:
+                self.storage.append(row)
         print(f"|=====----- {self.inv_name.upper()} -----=====|")
         print(
             tabulate(
                 self.storage,
-                showindex=list(map(lambda x: x + 1, list(range(len(self.storage))))),
                 tablefmt="simple_grid",
+                headers="firstrow",
+                showindex=list(
+                    map(lambda x: x + 1, list(range(len(self.storage) - 1)))
+                ),
             )
         )
         print("")
@@ -115,7 +126,7 @@ def main():
     # saved_inventories_menu = ProgramMenu("My Inventories")
     selected_option: str = "Main Menu"
 
-    # Program Loop
+    # Program Main Loop
     while True:
         match selected_option:
             case "Main Menu":
@@ -129,36 +140,19 @@ def main():
                 sys.exit("\nWORK IN PROGRESS\n")
             case "Manage Existing Inventory":
                 # Read local directory for .csv files
-                csv_files = list(
-                    filter(lambda x: x.endswith(".csv"), list(os.listdir()))
-                )
-                csv_files = list(map(lambda x: x.rstrip(".csv"), csv_files))
-                # Create a program menu object for display of all .csv files in the directory
+                csv_files = list_saved_csvs("./inventories", remove_extension_from_file)
+
+                # Create a ProgramMenu object for display of all .csv files in the directory
                 inventory_menu = ProgramMenu("My Inventories", [csv_files])
                 inventory_menu.options_table()
+
                 # Prompts the user for a specific inventory and then reads the .csv inventory file
                 inventory_file = inventory_menu.input_option()
-                with open(f"{inventory_file}.csv") as file:
-                    my_csv = csv.reader(file)
-                    inventory_list = []
-                    for row in my_csv:
-                        inventory_list.append(row)
-                    print(f"|=====----- {inventory_file.upper()} -----=====|")
-                    print(
-                        tabulate(
-                            inventory_list,
-                            tablefmt="simple_grid",
-                            headers="firstrow",
-                            showindex=list(
-                                map(
-                                    lambda x: x + 1,
-                                    list(range(len(inventory_list) - 1)),
-                                )
-                            ),
-                        )
-                    )
+                current_inventory = Inventory(inventory_file)
+                current_inventory.inventory_table()
+
                 # Creates an inventory object for the opened .csv file for modification/viewing
-                current_inventory = Inventory(inventory_file, inventory_list)
+                current_inventory = Inventory(inventory_file)
                 selected_option = "Inventory Menu"
             case "Inventory Menu":
                 # WIP
@@ -170,8 +164,33 @@ def main():
 
 
 def splash_screen():
+    """
+    Prints the program splash screen
+    """
     print(Figlet().renderText("Food Inventory Management"))
     print('----- "A handy inventory management program for your food" -----\n')
+
+
+def list_saved_csvs(my_path: str, map_function=None):
+    """
+    List all the saved CSV in the current directory
+    map_function is optional, uses map to apply function to list items
+    """
+    file_list = list(
+        filter(lambda x: x.endswith(".csv"), list(os.listdir(path=my_path)))
+    )
+    if map_function != None:
+        file_list = list(map(map_function, file_list))
+        return file_list
+    return file_list
+
+
+def remove_extension_from_file(filename: str):
+    """
+    Function to remove extension from the filename of a file
+    """
+    if matches := re.search(r"^(.+)(\.\w+)$", f"{filename}", flags=re.IGNORECASE):
+        return matches.group(1)
 
 
 if __name__ == "__main__":
