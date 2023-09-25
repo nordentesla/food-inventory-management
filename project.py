@@ -37,7 +37,7 @@ class ProgramMenu:
     def __len__(self, input_list: list):
         return len(input_list)
 
-    def options_table(self):
+    def display_options(self):
         print(f"|=====----- {self.ui_name.upper()} -----=====|")
         print(
             tabulate(
@@ -65,12 +65,6 @@ class ProgramMenu:
                 print("!!! Invalid option, select a valid option number !!!")
                 continue
 
-    def inventory_option(self):
-        ...
-
-    def item_option(self):
-        ...
-
 
 class Inventory:
     def __init__(self, inv_name: str, storage: list[list] = [[]]):
@@ -82,7 +76,7 @@ class Inventory:
     def __len__(self, input_list: list):
         return len(input_list)
 
-    def inventory_table(self):
+    def display_inventory(self):
         self.storage = []
         with open(f"./inventories/{self.inv_name}.csv") as file:
             my_csv = csv.reader(file)
@@ -101,6 +95,9 @@ class Inventory:
         )
         print("")
 
+    def save_new_inventory(self):
+        WIP()
+
     def item_option(self):
         while True:
             try:
@@ -108,7 +105,7 @@ class Inventory:
                     f"===> {self.inv_name.upper()} - Select Item Number: "
                 )
                 if 0 < int(user_input) <= len(self.storage):
-                    print("WIP")
+                    WIP()
                 print("Invalid item, select a valid item number")
                 continue
             except ValueError:
@@ -117,48 +114,47 @@ class Inventory:
 
 
 def main():
-    # Initialization
+    # Initial selection
     main_menu = ProgramMenu(
         "Main Menu",
         [["New Inventory"], ["Manage Existing Inventory"], ["Exit Program"]],
     )
-
-    # saved_inventories_menu = ProgramMenu("My Inventories")
+    splash_screen()
     selected_option: str = "Main Menu"
-
     # Program Main Loop
     while True:
         match selected_option:
             case "Main Menu":
-                splash_screen()
-                main_menu.options_table()
+                main_menu.display_options()
                 selected_option = main_menu.input_option()
+
             case "Back to Main Menu":
                 selected_option = "Main Menu"
+
             case "New Inventory":
-                # WIP
-                sys.exit("\nWORK IN PROGRESS\n")
+                current_inventory = Inventory()
+                WIP()
+
             case "Manage Existing Inventory":
-                # Read local directory for .csv files
+                # Read local directory for .csv files, and
                 csv_files = list_saved_csvs("./inventories", remove_extension_from_file)
 
                 # Create a ProgramMenu object for display of all .csv files in the directory
-                inventory_menu = ProgramMenu("My Inventories", [csv_files])
-                inventory_menu.options_table()
+                my_inventories = ProgramMenu("My Inventories", csv_files)
+                my_inventories.display_options()
 
-                # Prompts the user for a specific inventory and then reads the .csv inventory file
-                inventory_file = inventory_menu.input_option()
-                current_inventory = Inventory(inventory_file)
-                current_inventory.inventory_table()
-
-                # Creates an inventory object for the opened .csv file for modification/viewing
-                current_inventory = Inventory(inventory_file)
+                # Initializes selected inventory file and directs to inventory menu
+                selected_inventory_file = my_inventories.input_option()
+                current_inventory = Inventory(selected_inventory_file)
+                current_inventory.display_inventory()
                 selected_option = "Inventory Menu"
+
             case "Inventory Menu":
-                # WIP
-                sys.exit("\n!!! WORK IN PROGRESS !!!\n")
+                WIP()
+
             case "Exit Program":
                 sys.exit("\n|----- Program Closed -----|\n")
+
             case _:
                 sys.exit("\n|----- PROGRAM ERROR: OPTION MISMATCH -----|\n")
 
@@ -175,13 +171,17 @@ def list_saved_csvs(my_path: str, map_function=None):
     """
     List all the saved CSV in the current directory
     map_function is optional, uses map to apply function to list items
+    Makes a list of files a list within itself i.e.: [[item1], [item2]] for tabulate library
     """
     file_list = list(
-        filter(lambda x: x.endswith(".csv"), list(os.listdir(path=my_path)))
+        filter(lambda x: x.endswith(".csv"), 
+               list(os.listdir(path=my_path)))
     )
     if map_function != None:
-        file_list = list(map(map_function, file_list))
-        return file_list
+        modified_file_list = []
+        for item in file_list:
+            modified_file_list.append([map_function(item)])
+        return modified_file_list
     return file_list
 
 
@@ -191,6 +191,10 @@ def remove_extension_from_file(filename: str):
     """
     if matches := re.search(r"^(.+)(\.\w+)$", f"{filename}", flags=re.IGNORECASE):
         return matches.group(1)
+
+
+def WIP():
+    sys.exit("\n!!! WORK IN PROGRESS !!!\n")
 
 
 if __name__ == "__main__":
