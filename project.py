@@ -104,7 +104,7 @@ class Inventory:
                     f"===> {self.inv_name.upper()} - Select Item Number: "
                 )
                 if 0 < int(user_input) <= len(self.storage):
-                    WIP()
+                    return self.storage[0][int(user_input)]
                 print("Invalid item, select a valid item number")
                 continue
             except ValueError:
@@ -135,7 +135,9 @@ def main():
 
                 case "Manage Existing Inventory":
                     # Read local directory for .csv files, and
-                    csv_files = list_saved_csvs("./inventories", remove_extension_from_file)
+                    csv_files = list_saved_csvs(
+                        "./inventories", remove_extension_from_file
+                    )
 
                     # Create a ProgramMenu object for display of all .csv files in the directory
                     my_inventories = ProgramMenu("My Inventories", csv_files)
@@ -153,7 +155,17 @@ def main():
                 case "Inventory Menu":
                     current_inventory = Inventory(selected_inventory_file)
                     current_inventory.display_inventory()
-                    print("** Other Options: Type '0' to go back to Main Menu **\n")
+                    print("")
+                    print(f"{current_inventory.inv_name.upper()} OPTIONS:")
+                    print(
+                        f"Type 'a' => Add an Item to {current_inventory.inv_name.upper()}",
+                        f"Type 'r' => Remove an Item from {current_inventory.inv_name.upper()}",
+                        f"Type 'e' => Export {current_inventory.inv_name.upper()} list as PDF",
+                        "Type 'i' => Back to other inventories",
+                        "Type '0' => Back to Main Menu",
+                        sep="\n", end="\n\n"
+                    )
+                    current_inventory.item_option()
                     WIP()
 
                 case "Exit Program":
