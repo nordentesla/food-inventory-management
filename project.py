@@ -46,7 +46,6 @@ class ProgramMenu:
                 tablefmt="simple_grid",
             )
         )
-        print("")
 
     def input_option(self):
         while True:
@@ -54,8 +53,8 @@ class ProgramMenu:
                 user_input = input(
                     f"===> {self.ui_name.upper()} - Input Option Number: "
                 )
-                if int(user_input) == 0:
-                    return "Back to Main Menu"
+                if user_input == "0":
+                    return "Main Menu"
                 elif 0 < int(user_input) <= len(self.ui_menu):
                     print("")
                     return self.ui_menu[int(user_input) - 1][0]
@@ -82,6 +81,7 @@ class Inventory:
             my_csv = csv.reader(file)
             for row in my_csv:
                 self.storage.append(row)
+        print("-------------------------------------------------\n")
         print(f"|=====----- {self.inv_name.upper()} -----=====|")
         print(
             tabulate(
@@ -93,7 +93,6 @@ class Inventory:
                 ),
             )
         )
-        print("")
 
     def save_new_inventory(self):
         WIP()
@@ -123,40 +122,47 @@ def main():
     selected_option: str = "Main Menu"
     # Program Main Loop
     while True:
-        match selected_option:
-            case "Main Menu":
-                main_menu.display_options()
-                selected_option = main_menu.input_option()
+        try:
+            match selected_option:
+                case "Main Menu":
+                    main_menu.display_options()
+                    selected_option = main_menu.input_option()
+                    print("** by ~nordentesla~ **\n")
 
-            case "Back to Main Menu":
-                selected_option = "Main Menu"
+                case "New Inventory":
+                    current_inventory = Inventory()
+                    WIP()
 
-            case "New Inventory":
-                current_inventory = Inventory()
-                WIP()
+                case "Manage Existing Inventory":
+                    # Read local directory for .csv files, and
+                    csv_files = list_saved_csvs("./inventories", remove_extension_from_file)
 
-            case "Manage Existing Inventory":
-                # Read local directory for .csv files, and
-                csv_files = list_saved_csvs("./inventories", remove_extension_from_file)
+                    # Create a ProgramMenu object for display of all .csv files in the directory
+                    my_inventories = ProgramMenu("My Inventories", csv_files)
+                    my_inventories.display_options()
+                    print("** Other Options: Type '0' to go back to Main Menu **\n")
 
-                # Create a ProgramMenu object for display of all .csv files in the directory
-                my_inventories = ProgramMenu("My Inventories", csv_files)
-                my_inventories.display_options()
+                    # Initializes selected inventory file and directs to inventory menu
+                    selected_inventory_file = my_inventories.input_option()
+                    if selected_inventory_file == "Main Menu":
+                        print("")
+                        selected_option = "Main Menu"
+                    else:
+                        selected_option = "Inventory Menu"
 
-                # Initializes selected inventory file and directs to inventory menu
-                selected_inventory_file = my_inventories.input_option()
-                current_inventory = Inventory(selected_inventory_file)
-                current_inventory.display_inventory()
-                selected_option = "Inventory Menu"
+                case "Inventory Menu":
+                    current_inventory = Inventory(selected_inventory_file)
+                    current_inventory.display_inventory()
+                    print("** Other Options: Type '0' to go back to Main Menu **\n")
+                    WIP()
 
-            case "Inventory Menu":
-                WIP()
+                case "Exit Program":
+                    sys.exit("\n|----- Program Closed -----|\n")
 
-            case "Exit Program":
-                sys.exit("\n|----- Program Closed -----|\n")
-
-            case _:
-                sys.exit("\n|----- PROGRAM ERROR: OPTION MISMATCH -----|\n")
+                case _:
+                    sys.exit("\n|----- PROGRAM ERROR: OPTION MISMATCH -----|\n")
+        except KeyboardInterrupt:
+            sys.exit("\n\n|----- Program Force Closed -----|\n")
 
 
 def splash_screen():
@@ -174,8 +180,7 @@ def list_saved_csvs(my_path: str, map_function=None):
     Makes a list of files a list within itself i.e.: [[item1], [item2]] for tabulate library
     """
     file_list = list(
-        filter(lambda x: x.endswith(".csv"), 
-               list(os.listdir(path=my_path)))
+        filter(lambda x: x.endswith(".csv"), list(os.listdir(path=my_path)))
     )
     if map_function != None:
         modified_file_list = []
@@ -194,7 +199,7 @@ def remove_extension_from_file(filename: str):
 
 
 def WIP():
-    sys.exit("\n!!! WORK IN PROGRESS !!!\n")
+    sys.exit("\n--- !!! WORK IN PROGRESS !!! ---\n")
 
 
 if __name__ == "__main__":
