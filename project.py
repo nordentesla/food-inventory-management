@@ -94,6 +94,39 @@ class Inventory:
             )
         )
 
+    def special_option(self):
+        print("")
+        print(f"{self.inv_name.upper()} OPTIONS:\n")
+        print(
+            f"Type 'a' => Add an Item to {self.inv_name.upper()}",
+            f"Type 'r' => Remove an Item from {self.inv_name.upper()}",
+            f"Type 'e' => Export {self.inv_name.upper()} list as PDF",
+            "Type 'i' => Back to Other Inventories",
+            "Type '0' => Back to Main Menu",
+            sep="\n", end="\n\n\n"
+            )
+        while True:
+            try:
+                user_input = input(
+                    f"===> {self.inv_name.upper()} - Type the Option: "
+                    )
+                match user_input:
+                    case "a":
+                        ...
+                    case "r":
+                        ...
+                    case "e":
+                        ...
+                    case "i":
+                        return "Manage Existing Inventory"
+                    case "0":
+                        return "Main Menu"
+                    case _:
+                        print("Invalid option typed, please type a valid option")
+                        continue
+            except KeyboardInterrupt:
+                return "Exit Program"
+            
     def save_new_inventory(self):
         WIP()
 
@@ -110,7 +143,6 @@ class Inventory:
             except ValueError:
                 print("Invalid item, select a valid item number")
                 continue
-
 
 def main():
     # Initial selection
@@ -155,18 +187,8 @@ def main():
                 case "Inventory Menu":
                     current_inventory = Inventory(selected_inventory_file)
                     current_inventory.display_inventory()
-                    print("")
-                    print(f"{current_inventory.inv_name.upper()} OPTIONS:")
-                    print(
-                        f"Type 'a' => Add an Item to {current_inventory.inv_name.upper()}",
-                        f"Type 'r' => Remove an Item from {current_inventory.inv_name.upper()}",
-                        f"Type 'e' => Export {current_inventory.inv_name.upper()} list as PDF",
-                        "Type 'i' => Back to other inventories",
-                        "Type '0' => Back to Main Menu",
-                        sep="\n", end="\n\n"
-                    )
-                    current_inventory.item_option()
-                    WIP()
+                    if option := current_inventory.special_option():
+                        selected_option = option
 
                 case "Exit Program":
                     sys.exit("\n|----- Program Closed -----|\n")
