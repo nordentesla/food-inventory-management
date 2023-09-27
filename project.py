@@ -54,7 +54,7 @@ class ProgramMenu:
             try:
                 user_input = input(
                     f"===> {self.ui_name.upper()} - Input Option Number: "
-                )
+                    )
                 if user_input == "0":
                     return "Main Menu"
                 elif 0 < int(user_input) <= len(self.ui_menu):
@@ -105,8 +105,8 @@ class Inventory:
         print(
             f"Type 'a' => Add an Item to {self.inv_name.upper()}",
             f"Type 'r' => Remove an Item from {self.inv_name.upper()}",
-            f"Type 'e' => Export \"{self.inv_name.upper()}\" list as PDF",
-            f"Type 'd' => Delete {self.inv_name.upper()} Inventory",
+            f"Type 'e' => Export \"{self.inv_name.upper()}\" inventory list as PDF",
+            f"Type 'd' => Delete \"{self.inv_name.upper()}\" Inventory",
             "Type 'i' => Back to My Inventories",
             "Type '0' => Back to Main Menu",
             sep="\n", end="\n\n\n"
@@ -125,13 +125,16 @@ class Inventory:
                     case "e":
                         WIP()
                     case "d":
-                        warning_prompt(my_func=os.remove(f"./inventories/{self.inv_name}.csv"),
-                                       action_description=f"delete {self.inv_name}",
-                                       )
-                        program_loading(f"{self.inv_name} deleted!",
-                                        "returning to my inventories menu",
+                        try:
+                            warning_prompt(my_func=os.remove(f"./inventories/{self.inv_name}.csv"),
+                                        action_description=f"delete {self.inv_name} and its {len(self.storage[0])} items",
                                         )
-                        return "Manage Existing Inventory"
+                            program_loading(f"{self.inv_name} deleted!",
+                                            "returning to my inventories menu",
+                                            )
+                            return "Manage Existing Inventory"
+                        except KeyboardInterrupt:
+                            return "Manage Existing Inventory"
                     case "i":
                         return "Manage Existing Inventory"
                     case "0":
@@ -230,7 +233,7 @@ def main():
                         selected_option = option
 
                 case "Exit Program":
-                    sys.exit("\n\n|----- Program Closed -----|\n")
+                    sys.exit("\n\n|----- Program Closed, Thank you for using the Program! -----|\n\n")
 
                 case _:
                     sys.exit("\n|----- PROGRAM ERROR: OPTION MISMATCH -----|\n")
@@ -266,7 +269,6 @@ def list_saved_csvs(my_path: str, map_function=None):
         return modified_file_list
     return file_list
 
-
 def remove_extension_from_file(filename: str):
     """
     Function to remove extension from the filename of a file
@@ -277,11 +279,13 @@ def remove_extension_from_file(filename: str):
 def warning_prompt(my_func, action_description: str = "NO DESC"):
     print(f"!!! ARE YOU SURE YOU WANT TO {action_description}? !!!".upper())
     while True:
-        _ = input("[Y/N]? ").lower()
-        match _:
+        yes_or_no = input("[Y/N]? ").lower()
+        match yes_or_no:
             case "y":
-                return my_func
+                my_func()
+                print(f"{action_description} successful".upper())
             case "n":
+                print(f"{action_description} cancelled".upper())
                 raise KeyboardInterrupt
             case _:
                 print("Type \"y\" for YES and \"n\" for NO")
