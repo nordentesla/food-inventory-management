@@ -34,3 +34,5 @@ Upon selection of an inventory, the list of all items inside the selected invent
 1. **Export as PDF** - prints the current list into a PDF file
 1. **Select Other Inventory** - goes back to **Manage Existing Inventory** menu for inventory selection
 1. **Back to Main Menu** - goes back to **Main Menu Selection**
+
+

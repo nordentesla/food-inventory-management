@@ -25,7 +25,7 @@ from tabulate import tabulate
 import sys
 import datetime
 import os
-from re import search
+import re
 from time import sleep
 
 
@@ -105,8 +105,9 @@ class Inventory:
         print(
             f"Type 'a' => Add an Item to {self.inv_name.upper()}",
             f"Type 'r' => Remove an Item from {self.inv_name.upper()}",
-            f"Type 'e' => Export {self.inv_name.upper()} list as PDF",
-            "Type 'i' => Back to Other Inventories",
+            f"Type 'e' => Export \"{self.inv_name.upper()}\" list as PDF",
+            f"Type 'd' => Delete {self.inv_name.upper()} Inventory",
+            "Type 'i' => Back to My Inventories",
             "Type '0' => Back to Main Menu",
             sep="\n", end="\n\n\n"
             )
@@ -118,23 +119,28 @@ class Inventory:
                 print("")
                 match user_input:
                     case "a":
-                        ...
+                        WIP()
                     case "r":
-                        ...
+                        WIP()
                     case "e":
-                        ...
+                        WIP()
+                    case "d":
+                        warning_prompt(my_func=os.remove(f"./inventories/{self.inv_name}.csv"),
+                                       action_description=f"delete {self.inv_name}",
+                                       )
+                        program_loading(f"{self.inv_name} deleted!",
+                                        "returning to my inventories menu",
+                                        )
+                        return "Manage Existing Inventory"
                     case "i":
                         return "Manage Existing Inventory"
                     case "0":
                         return "Main Menu"
                     case _:
-                        print("!!! Invalid option, select a valid option number !!!\n")
+                        print("!!! Invalid option, type a valid option !!!\n")
                         continue
             except KeyboardInterrupt:
                 return "Exit Program"
-            
-    def save_new_inventory(self):
-        WIP()
 
     def item_option(self):
         while True:
@@ -156,7 +162,7 @@ class Inventory:
     
     @inv_name.setter
     def inv_name(self, inv_name):
-        if not search(r"^(\w)+$", inv_name):
+        if not re.search(r"^(\w)+$", inv_name):
             raise ValueError("!!! Invalid inventory name !!!".upper())
         self._inv_name = inv_name
         
@@ -182,12 +188,9 @@ def main():
                         try:
                             current_inventory = Inventory(
                                 input("Enter new inventory name: ".upper())
-                                    )
-                            with open(
-                                f"./inventories/{current_inventory.inv_name}.csv", "x"
-                                ) as new_inv_file:
-                                csv_writer = csv.writer(new_inv_file)
-                                csv_writer.writerow(["Item", "Expiry Date", "Quantity"])
+                                )
+                            warning_prompt(create_csv_file(current_inventory.inv_name),
+                                           f"create new inventory named {current_inventory.inv_name}")
                             break
                         except (ValueError, NameError):
                             print("\n!!! Alphanumeric characters and underscore only !!!\n")
@@ -195,10 +198,9 @@ def main():
                         except FileExistsError:
                             print("\n\n!!! Inventory already exists, please enter a different name !!!\n\n")
                             continue
-                    print("\n\n", current_inventory.inv_name.upper(), " inventory created!", sep="")
-                    sleep(1)
-                    print("Loading new inventory, Please wait...\n".upper())
-                    sleep(2.5)
+                    program_loading(
+                        f"\"{current_inventory.inv_name}\" inventory created",
+                        f"opening {current_inventory.inv_name} inventory",)
                     selected_option = "Inventory Menu"
                     selected_inventory_file = current_inventory.inv_name
 
@@ -244,6 +246,10 @@ def splash_screen():
     print('----- "A handy inventory management program for your food" -----\n')
     print("** by ~nordentesla~ **\n")
 
+def create_csv_file(filename):
+     with open(f"./inventories/{filename}.csv", "x") as new_inv_file:
+        csv_writer = csv.writer(new_inv_file)
+        csv_writer.writerow(["Item", "Expiry Date", "Quantity"])
 
 def list_saved_csvs(my_path: str, map_function=None):
     """
@@ -252,10 +258,7 @@ def list_saved_csvs(my_path: str, map_function=None):
     Makes a list of files a list within itself i.e.: [[item1], [item2]] for tabulate library
     """
     file_list = list(
-        filter(
-            lambda x: x.endswith(".csv") and (["Item","Expiry Date","Quantity"] in csv.reader(f"{x}")), 
-               list(os.listdir(path=my_path)),)
-    )
+        filter(lambda x: x.endswith(".csv"), list(os.listdir(path=my_path))))
     if map_function != None:
         modified_file_list = []
         for item in file_list:
@@ -270,7 +273,28 @@ def remove_extension_from_file(filename: str):
     """
     if matches := re.search(r"^(.+)(\.\w+)$", f"{filename}", flags=re.IGNORECASE):
         return matches.group(1)
+    
+def warning_prompt(my_func, action_description: str = "NO DESC"):
+    print(f"!!! ARE YOU SURE YOU WANT TO {action_description}? !!!".upper())
+    while True:
+        _ = input("[Y/N]? ").lower()
+        match _:
+            case "y":
+                return my_func
+            case "n":
+                raise KeyboardInterrupt
+            case _:
+                print("Type \"y\" for YES and \"n\" for NO")
+                continue
 
+def program_loading(notice: str, next_notice: str = ""):
+    print(f"\n\n{notice.upper()}\n\n")
+    sleep(1)
+    print("Loading, Please wait...\n".upper())
+    sleep(1.5)
+    if next_notice != "":
+        print(f"\n{next_notice}\n".upper())
+        sleep(1)
 
 def WIP():
     sys.exit("\n--- !!! WORK IN PROGRESS !!! ---\n")
