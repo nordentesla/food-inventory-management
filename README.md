@@ -29,7 +29,7 @@ Upon selection of an inventory, the list of all items inside the selected invent
     1. **Date of Expiry** - *input* - follows ISO 8601 format: YYYY-MM-DD
 1. **Remove an Item** - prompts the user for option number that is displayed in the current inventory
     1. **Item Number** - *input* - option number selection for the item to be edited or removed
-        1. **Removal Quantity**  (Usage: -a to remove all quantity, -c to cancel item removal) - *input* - removes a specified number of quantity, if all quantity is removed, entry removal is shown and established
+        1. **Removal Quantity**  (Usage: 'all' to remove all quantity, 'c' to cancel item removal) - *input* - removes a specified number of quantity, if all quantity is removed, entry removal is shown and established
     1. **Cancel Item Removal** - goes back to current **Inventory Menu**
 1. **Export as PDF** - prints the current list into a PDF file
 1. **Select Other Inventory** - goes back to **Manage Existing Inventory** menu for inventory selection

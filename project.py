@@ -25,7 +25,8 @@ from tabulate import tabulate
 import sys
 import datetime
 import os
-import re
+from re import search
+from time import sleep
 
 
 class ProgramMenu:
@@ -38,6 +39,7 @@ class ProgramMenu:
         return len(input_list)
 
     def display_options(self):
+        print("-------------------------------------------------\n")
         print(f"|=====----- {self.ui_name.upper()} -----=====|")
         print(
             tabulate(
@@ -71,6 +73,9 @@ class Inventory:
         self.storage = storage
         self.filename_with_extension = str
         self.match = str
+
+    def __str__(self):
+        return f"\n\nINVENTORY: {self.inv_name}, CONTAINING {self.storage[0]}\n\n"
 
     def __len__(self, input_list: list):
         return len(input_list)
@@ -110,6 +115,7 @@ class Inventory:
                 user_input = input(
                     f"===> {self.inv_name.upper()} - Type the Option: "
                     )
+                print("")
                 match user_input:
                     case "a":
                         ...
@@ -122,7 +128,7 @@ class Inventory:
                     case "0":
                         return "Main Menu"
                     case _:
-                        print("Invalid option typed, please type a valid option")
+                        print("!!! Invalid option, select a valid option number !!!\n")
                         continue
             except KeyboardInterrupt:
                 return "Exit Program"
@@ -144,6 +150,17 @@ class Inventory:
                 print("Invalid item, select a valid item number")
                 continue
 
+    @property
+    def inv_name(self):
+        return self._inv_name
+    
+    @inv_name.setter
+    def inv_name(self, inv_name):
+        if not search(r"^(\w)+$", inv_name):
+            raise ValueError("!!! Invalid inventory name !!!".upper())
+        self._inv_name = inv_name
+        
+
 def main():
     # Initial selection
     main_menu = ProgramMenu(
@@ -159,11 +176,31 @@ def main():
                 case "Main Menu":
                     main_menu.display_options()
                     selected_option = main_menu.input_option()
-                    print("** by ~nordentesla~ **\n")
 
                 case "New Inventory":
-                    current_inventory = Inventory()
-                    WIP()
+                    while True:
+                        try:
+                            current_inventory = Inventory(
+                                input("Enter new inventory name: ".upper())
+                                    )
+                            with open(
+                                f"./inventories/{current_inventory.inv_name}.csv", "x"
+                                ) as new_inv_file:
+                                csv_writer = csv.writer(new_inv_file)
+                                csv_writer.writerow(["Item", "Expiry Date", "Quantity"])
+                            break
+                        except (ValueError, NameError):
+                            print("\n!!! Alphanumeric characters and underscore only !!!\n")
+                            continue
+                        except FileExistsError:
+                            print("\n\n!!! Inventory already exists, please enter a different name !!!\n\n")
+                            continue
+                    print("\n\n", current_inventory.inv_name.upper(), " inventory created!", sep="")
+                    sleep(1)
+                    print("Loading new inventory, Please wait...\n".upper())
+                    sleep(2.5)
+                    selected_option = "Inventory Menu"
+                    selected_inventory_file = current_inventory.inv_name
 
                 case "Manage Existing Inventory":
                     # Read local directory for .csv files, and
@@ -191,7 +228,7 @@ def main():
                         selected_option = option
 
                 case "Exit Program":
-                    sys.exit("\n|----- Program Closed -----|\n")
+                    sys.exit("\n\n|----- Program Closed -----|\n")
 
                 case _:
                     sys.exit("\n|----- PROGRAM ERROR: OPTION MISMATCH -----|\n")
@@ -205,6 +242,7 @@ def splash_screen():
     """
     print(Figlet().renderText("Food Inventory Management"))
     print('----- "A handy inventory management program for your food" -----\n')
+    print("** by ~nordentesla~ **\n")
 
 
 def list_saved_csvs(my_path: str, map_function=None):
@@ -214,7 +252,9 @@ def list_saved_csvs(my_path: str, map_function=None):
     Makes a list of files a list within itself i.e.: [[item1], [item2]] for tabulate library
     """
     file_list = list(
-        filter(lambda x: x.endswith(".csv"), list(os.listdir(path=my_path)))
+        filter(
+            lambda x: x.endswith(".csv") and (["Item","Expiry Date","Quantity"] in csv.reader(f"{x}")), 
+               list(os.listdir(path=my_path)),)
     )
     if map_function != None:
         modified_file_list = []
