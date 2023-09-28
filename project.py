@@ -46,7 +46,8 @@ class ProgramMenu:
                 self.ui_menu,
                 showindex=list(map(lambda x: x + 1, list(range(len(self.ui_menu))))),
                 tablefmt="simple_grid",
-            ), "\n"
+            ),
+            "\n",
         )
 
     def input_option(self):
@@ -54,7 +55,7 @@ class ProgramMenu:
             try:
                 user_input = input(
                     f"===> {self.ui_name.upper()} - Input Option Number: "
-                    )
+                )
                 if user_input == "0":
                     print("")
                     sleep(0.5)
@@ -93,7 +94,7 @@ class Inventory:
         print(f"|=====----- {self.inv_name.upper()} -----=====|")
         print(
             tabulate(
-                sorted(self.storage),
+                self.storage,
                 tablefmt="simple_grid",
                 headers="firstrow",
                 showindex=list(
@@ -109,45 +110,69 @@ class Inventory:
         print(
             f"Type 'a' => Add an Item to {self.inv_name.upper()}",
             f"Type 'r' => Remove an Item from {self.inv_name.upper()}",
-            f"Type 'e' => Export \"{self.inv_name.upper()}\" inventory list as PDF",
+            f"Type 'e' => Export \"{self.inv_name.upper()}\" inventory list as A4-sized PDF",
             f"Type 'd' => Delete \"{self.inv_name.upper()}\" Inventory",
             "Type 'i' => Back to My Inventories",
             "Type '0' => Back to Main Menu",
-            sep="\n", end="\n\n\n"
-            )
+            sep="\n",
+            end="\n\n\n",
+        )
         while True:
             try:
-                user_input = input(
-                    f"===> {self.inv_name.upper()} - Type the Option: "
-                    )
+                user_input = input(f"===> {self.inv_name.upper()} - Type the Option: ")
                 print("")
                 match user_input:
                     case "a":
+                        # open the csv file
+                        # parse the csv file
+                        # ask for input: item name, expiry date, quantity
+                        # process the inputs for verification (preferably each inputs)
+                        # join inputs into an item list
+                        # append inputed list into the file
+                        # print a notice that the file is saved
+                        # print the item list of the inventory
                         WIP()
                     case "r":
+                        # open the csv file
+                        # parse the csv file
+                        # select item number from the inventory
+                        # ask user for input for quantity to be removed
+                        # verify if the input is a valid integer, and less than the item quantity
+                        # prompt the user if they wish to proceed with the inputted quantity to be removed
+                        # subtract the quantity from the item
+                        # if the item yields to 0, remove the item from the .csv file
                         WIP()
                     case "e":
+                        # ask for prompt if they want to export the current list as PDF
+                        # if yes, notify that the inventory is successfully exported
+                        # if no, return to the current inventory menu
                         WIP()
                     case "d":
                         while True:
-                            confirm_delete: str = input(
+                            confirm_delete: str = (
+                                input(
                                     f"Are you sure you want to delete {self.inv_name.upper()}? [Y/N]: "
-                                    ).lower().strip()
+                                )
+                                .lower()
+                                .strip()
+                            )
                             if confirm_delete == "y":
                                 delete_csv_file(self.inv_name)
-                                loading_notices(f"{self.inv_name} deleted!",
-                                            "returning to my inventories menu",
-                                            )
+                                loading_notices(
+                                    f"{self.inv_name} deleted!",
+                                    "returning to my inventories menu",
+                                )
                                 return "Manage Existing Inventory"
                             elif confirm_delete == "n":
-                                loading_notices(f"deletion cancelled",
-                                                f"returning to {self.inv_name} options menu"
-                                                )
+                                loading_notices(
+                                    f"deletion cancelled",
+                                    f"returning to {self.inv_name} options menu",
+                                )
                                 return "Inventory Menu"
                             else:
                                 print(
-                                    "\nInvalid option \"y\" for Yes and \"n\" for No only\n".upper()
-                                    )
+                                    '\nInvalid option "y" for Yes and "n" for No only\n'.upper()
+                                )
                                 continue
                     case "i":
                         return "Manage Existing Inventory"
@@ -176,13 +201,13 @@ class Inventory:
     @property
     def inv_name(self):
         return self._inv_name
-    
+
     @inv_name.setter
     def inv_name(self, inv_name):
         if not re.search(r"^(\w)+$", inv_name):
             raise ValueError("!!! Invalid inventory name !!!".upper())
         self._inv_name = inv_name
-        
+
 
 def main():
     # Initial selection
@@ -206,17 +231,21 @@ def main():
                             # Prompt for inventory name
                             current_inventory = Inventory(
                                 input("Enter new inventory name: ".upper())
+                            )
+                            confirm_create = (
+                                input(
+                                    f"Do you want to create {current_inventory.inv_name}? [Y/N]: "
                                 )
-                            confirm_create = input(
-                                f"Do you want to create {current_inventory.inv_name}? [Y/N]: "
-                                ).lower().strip()
+                                .lower()
+                                .strip()
+                            )
                             if confirm_create == "y":
                                 # inventory creation
                                 create_csv_file(current_inventory.inv_name)
                                 loading_notices(
-                                    f"\"{current_inventory.inv_name}\" inventory created",
+                                    f'"{current_inventory.inv_name}" inventory created',
                                     f"opening {current_inventory.inv_name} inventory...",
-                                    )
+                                )
                                 selected_option = "Inventory Menu"
                                 selected_inventory_file = current_inventory.inv_name
                                 break
@@ -231,14 +260,18 @@ def main():
                             else:
                                 # invalid confirmation (y/n) for inventory creation
                                 print(
-                                    "\nInvalid option \"y\" for Yes and \"n\" for No only\n".upper()
-                                    )
+                                    '\nInvalid option "y" for Yes and "n" for No only\n'.upper()
+                                )
                                 continue
                         except (ValueError, NameError):
-                            print("\n!!! Alphanumeric characters and underscore only !!!\n")
+                            print(
+                                "\n!!! Alphanumeric characters and underscore only !!!\n"
+                            )
                             continue
                         except FileExistsError:
-                            print("\n\n!!! Inventory already exists, please enter a different name !!!\n\n")
+                            print(
+                                "\n\n!!! Inventory already exists, please enter a different name !!!\n\n"
+                            )
                             continue
 
                 case "Manage Existing Inventory":
@@ -267,7 +300,9 @@ def main():
                         selected_option = option
 
                 case "Exit Program":
-                    sys.exit("\n\n|----- Program Closed, Thank you for using the Program! -----|\n\n")
+                    sys.exit(
+                        "\n\n|----- Program Closed, Thank you for using the Program! -----|\n\n"
+                    )
 
                 case _:
                     sys.exit("\n|----- PROGRAM ERROR: OPTION MISMATCH -----|\n")
@@ -283,18 +318,21 @@ def splash_screen():
     print('----- "A handy inventory management program for your food" -----\n')
     print("** by ~nordentesla~ **\n")
 
+
 def create_csv_file(filename):
-     with open(f"./inventories/{filename}.csv", "x") as new_inv_file:
+    with open(f"./inventories/{filename}.csv", "x") as new_inv_file:
         csv_writer = csv.writer(new_inv_file)
         csv_writer.writerow(["Item", "Expiry Date", "Quantity"])
 
-def delete_csv_file(filename) -> None:
+
+def delete_csv_file(filename):
     """
     created to prevent carrying over the selected_option = 'd'
     when declining the delete prompt for the current inventory
     """
     os.remove(f"./inventories/{filename}.csv")
     return "Manage Existing Inventory"
+
 
 def list_saved_csvs(my_path: str, map_function=None):
     """
@@ -303,7 +341,10 @@ def list_saved_csvs(my_path: str, map_function=None):
     Makes a list of files a list within itself i.e.: [[item1], [item2]] for tabulate library
     """
     file_list = list(
-        filter(lambda x: x.endswith(".csv"), list(os.listdir(path=my_path))))
+        filter(lambda x: x.endswith(".csv"), list(os.listdir(path=my_path)))
+    )
+    # second filter: if has valid header:
+    # file list modifier
     if map_function != None:
         modified_file_list = []
         for item in file_list:
@@ -311,12 +352,14 @@ def list_saved_csvs(my_path: str, map_function=None):
         return modified_file_list
     return file_list
 
+
 def remove_extension_from_file(filename: str):
     """
     Function to remove extension from the filename of a file
     """
     if matches := re.search(r"^(.+)(\.\w+)$", f"{filename}", flags=re.IGNORECASE):
         return matches.group(1)
+
 
 # UI TEXT NOTICES
 def loading_notices(*notices: str):
@@ -328,7 +371,11 @@ def loading_notices(*notices: str):
         print(f"\n\n{notice.upper()}\n")
         sleep(1.2)
 
+
 def WIP():
+    """
+    placeholder for work in progress functions/objects
+    """
     sys.exit("\n--- !!! WORK IN PROGRESS !!! ---\n")
 
 
