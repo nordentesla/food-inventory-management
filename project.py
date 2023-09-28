@@ -144,7 +144,7 @@ class Inventory:
                         WIP()
                     case "e":
                         # ask for prompt if they want to export the current list as PDF
-                        # if yes, notify that the inventory is successfully exported
+                        # if yes, notify that the inventory is successfully exported to saved-pdf folder
                         # if no, return to the current inventory menu
                         WIP()
                     case "d":
