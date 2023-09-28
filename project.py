@@ -1,6 +1,6 @@
 """
 FOOD INVENTORY MANAGEMENT
-by Jose Nichole C. Galenzoga
+by Jose Nichole C. Galenzoga (nordentesla)
 
 Final Python project for Harvard University's CS50P course
     Requirements:
@@ -27,6 +27,7 @@ import datetime
 import os
 import re
 from time import sleep
+from fpdf import FPDF
 
 
 class ProgramMenu:
@@ -146,7 +147,32 @@ class Inventory:
                         # ask for prompt if they want to export the current list as PDF
                         # if yes, notify that the inventory is successfully exported to saved-pdf folder
                         # if no, return to the current inventory menu
-                        WIP()
+                        while True:
+                            confirm_create_pdf: str = (
+                                input(
+                                    f"Do you want to export {self.inv_name.upper()} as PDF? [Y/N]: "
+                                )
+                                .lower()
+                                .strip()
+                            )
+                            if confirm_create_pdf == "y":
+                                pdf_maker(self.storage)
+                                loading_notices(
+                                    f"{self.inv_name} inventory exported as pdf",
+                                    'pdf file saved at "saved-pdf" folder',
+                                    "opening newly created PDF file...",
+                                )
+                            elif confirm_create_pdf == "n":
+                                loading_notices(
+                                    "export as pdf cancelled",
+                                    "returning to inventory menu...",
+                                )
+                                return "Inventory Menu"
+                            else:
+                                print(
+                                    '\nInvalid option "y" for Yes and "n" for No only\n'.upper()
+                                )
+                                continue
                     case "d":
                         while True:
                             confirm_delete: str = (
@@ -351,6 +377,14 @@ def list_saved_csvs(my_path: str, map_function=None):
             modified_file_list.append([map_function(item)])
         return modified_file_list
     return file_list
+
+
+def pdf_maker(inventory_list):
+    # PDF initialization
+    my_pdf = FPDF()
+    my_pdf.add_page()
+    print(inventory_list)
+    WIP()
 
 
 def remove_extension_from_file(filename: str):
