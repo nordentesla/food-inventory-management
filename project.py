@@ -28,6 +28,8 @@ import os
 import re
 from time import sleep
 from fpdf import FPDF
+from fpdf.fonts import FontFace
+from fpdf.enums import TableCellFillMode
 
 
 class ProgramMenu:
@@ -111,7 +113,7 @@ class Inventory:
         print(
             f"Type 'a' => Add an Item to {self.inv_name.upper()}",
             f"Type 'r' => Remove an Item from {self.inv_name.upper()}",
-            f"Type 'e' => Export \"{self.inv_name.upper()}\" inventory list as A4-sized PDF",
+            f"Type 'e' => Export \"{self.inv_name.upper()}\" inventory list as PDF",
             f"Type 'd' => Delete \"{self.inv_name.upper()}\" Inventory",
             "Type 'i' => Back to My Inventories",
             "Type '0' => Back to Main Menu",
@@ -144,24 +146,22 @@ class Inventory:
                         # if the item yields to 0, remove the item from the .csv file
                         WIP()
                     case "e":
-                        # ask for prompt if they want to export the current list as PDF
-                        # if yes, notify that the inventory is successfully exported to saved-pdf folder
-                        # if no, return to the current inventory menu
                         while True:
                             confirm_create_pdf: str = (
                                 input(
-                                    f"Do you want to export {self.inv_name.upper()} as PDF? [Y/N]: "
+                                    f"Do you want to export {self.inv_name.upper()} as PDF?[Y/N]: "
                                 )
                                 .lower()
                                 .strip()
                             )
                             if confirm_create_pdf == "y":
-                                pdf_maker(self.storage)
+                                pdf_maker(self.inv_name, self.storage)
                                 loading_notices(
                                     f"{self.inv_name} inventory exported as pdf",
                                     'pdf file saved at "saved-pdf" folder',
-                                    "opening newly created PDF file...",
+                                    "returning to inventory menu..."
                                 )
+                                return "Inventory Menu"
                             elif confirm_create_pdf == "n":
                                 loading_notices(
                                     "export as pdf cancelled",
@@ -379,12 +379,32 @@ def list_saved_csvs(my_path: str, map_function=None):
     return file_list
 
 
-def pdf_maker(inventory_list):
+def pdf_maker(pdf_filename: str, inventory_list: list):
+    """
+    main function for pdf creation of inventories when
+    export as PDF option is selected
+    """
     # PDF initialization
     my_pdf = FPDF()
+    my_pdf.set_author("Northwind Creative")
+    my_pdf.set_font(family='helvetica', size=30)
+    # creating PDF page and content
     my_pdf.add_page()
-    print(inventory_list)
-    WIP()
+    my_pdf.cell(txt=f'{pdf_filename} items'.title(), center=True)
+    my_pdf.ln(15)
+    # creates table from data, taken from FPDF2 documentation, for further study
+    my_pdf.set_font(family='helvetica', size=15)
+    with my_pdf.table() as pdf_table:
+        for data_row in inventory_list:
+            row = pdf_table.row()
+            for datum in data_row:
+                row.cell(datum)
+    # program signature
+    my_pdf.ln(4)
+    my_pdf.set_font(family='helvetica', size=10)
+    my_pdf.cell(txt="Created with Food Inventory Management by nordentesla", center=True)
+    # saving PDF file
+    my_pdf.output(name=f'./saved-pdf/{pdf_filename}.pdf')
 
 
 def remove_extension_from_file(filename: str):
