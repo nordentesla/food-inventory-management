@@ -28,8 +28,6 @@ import os
 import re
 from time import sleep
 from fpdf import FPDF
-from fpdf.fonts import FontFace
-from fpdf.enums import TableCellFillMode
 
 
 class ProgramMenu:
@@ -159,7 +157,7 @@ class Inventory:
                                 loading_notices(
                                     f"{self.inv_name} inventory exported as pdf",
                                     'pdf file saved at "saved-pdf" folder',
-                                    "returning to inventory menu..."
+                                    "returning to inventory menu...",
                                 )
                                 return "Inventory Menu"
                             elif confirm_create_pdf == "n":
@@ -366,10 +364,14 @@ def list_saved_csvs(my_path: str, map_function=None):
     map_function is optional, uses map to apply function to list items
     Makes a list of files a list within itself i.e.: [[item1], [item2]] for tabulate library
     """
+    # first filter: all .csv file in the directory
     file_list = list(
         filter(lambda x: x.endswith(".csv"), list(os.listdir(path=my_path)))
     )
     # second filter: if has valid header:
+    file_list = list(
+        filter(lambda x: "Item,\"Expiry Date\",Quantity\n" in open(f"./inventories/{x}"), file_list)
+    )
     # file list modifier
     if map_function != None:
         modified_file_list = []
@@ -387,13 +389,13 @@ def pdf_maker(pdf_filename: str, inventory_list: list):
     # PDF initialization
     my_pdf = FPDF()
     my_pdf.set_author("Northwind Creative")
-    my_pdf.set_font(family='helvetica', size=30)
+    my_pdf.set_font(family="helvetica", size=30)
     # creating PDF page and content
     my_pdf.add_page()
-    my_pdf.cell(txt=f'{pdf_filename} items'.title(), center=True)
+    my_pdf.cell(txt=f"{pdf_filename} items".title(), center=True)
     my_pdf.ln(15)
     # creates table from data, taken from FPDF2 documentation, for further study
-    my_pdf.set_font(family='helvetica', size=15)
+    my_pdf.set_font(family="helvetica", size=15)
     with my_pdf.table() as pdf_table:
         for data_row in inventory_list:
             row = pdf_table.row()
@@ -401,10 +403,12 @@ def pdf_maker(pdf_filename: str, inventory_list: list):
                 row.cell(datum)
     # program signature
     my_pdf.ln(4)
-    my_pdf.set_font(family='helvetica', size=10)
-    my_pdf.cell(txt="Created with Food Inventory Management by nordentesla", center=True)
+    my_pdf.set_font(family="helvetica", size=10)
+    my_pdf.cell(
+        txt="Created with Food Inventory Management by nordentesla", center=True
+    )
     # saving PDF file
-    my_pdf.output(name=f'./saved-pdf/{pdf_filename}.pdf')
+    my_pdf.output(name=f"./saved-pdf/{pdf_filename}.pdf")
 
 
 def remove_extension_from_file(filename: str):
