@@ -46,7 +46,7 @@ class ProgramMenu:
                 self.ui_menu,
                 showindex=list(map(lambda x: x + 1, list(range(len(self.ui_menu))))),
                 tablefmt="simple_grid",
-            )
+            ), "\n"
         )
 
     def input_option(self):
@@ -56,9 +56,12 @@ class ProgramMenu:
                     f"===> {self.ui_name.upper()} - Input Option Number: "
                     )
                 if user_input == "0":
+                    print("")
+                    sleep(0.5)
                     return "Main Menu"
                 elif 0 < int(user_input) <= len(self.ui_menu):
                     print("")
+                    sleep(0.5)
                     return self.ui_menu[int(user_input) - 1][0]
                 print("!!! Invalid option, select a valid option number !!!")
                 continue
@@ -90,7 +93,7 @@ class Inventory:
         print(f"|=====----- {self.inv_name.upper()} -----=====|")
         print(
             tabulate(
-                self.storage,
+                sorted(self.storage),
                 tablefmt="simple_grid",
                 headers="firstrow",
                 showindex=list(
@@ -98,6 +101,7 @@ class Inventory:
                 ),
             )
         )
+        print(f"!--- {self.inv_name} has {len(self.storage)-1} item(s) ---!".upper())
 
     def special_option(self):
         print("")
@@ -125,16 +129,26 @@ class Inventory:
                     case "e":
                         WIP()
                     case "d":
-                        try:
-                            warning_prompt(my_func=os.remove(f"./inventories/{self.inv_name}.csv"),
-                                        action_description=f"delete {self.inv_name} and its {len(self.storage[0])} items",
-                                        )
-                            program_loading(f"{self.inv_name} deleted!",
+                        while True:
+                            confirm_delete: str = input(
+                                    f"Are you sure you want to delete {self.inv_name.upper()}? [Y/N]: "
+                                    ).lower().strip()
+                            if confirm_delete == "y":
+                                delete_csv_file(self.inv_name)
+                                loading_notices(f"{self.inv_name} deleted!",
                                             "returning to my inventories menu",
                                             )
-                            return "Manage Existing Inventory"
-                        except KeyboardInterrupt:
-                            return "Manage Existing Inventory"
+                                return "Manage Existing Inventory"
+                            elif confirm_delete == "n":
+                                loading_notices(f"deletion cancelled",
+                                                f"returning to {self.inv_name} options menu"
+                                                )
+                                return "Inventory Menu"
+                            else:
+                                print(
+                                    "\nInvalid option \"y\" for Yes and \"n\" for No only\n".upper()
+                                    )
+                                continue
                     case "i":
                         return "Manage Existing Inventory"
                     case "0":
@@ -189,23 +203,43 @@ def main():
                 case "New Inventory":
                     while True:
                         try:
+                            # Prompt for inventory name
                             current_inventory = Inventory(
                                 input("Enter new inventory name: ".upper())
                                 )
-                            warning_prompt(create_csv_file(current_inventory.inv_name),
-                                           f"create new inventory named {current_inventory.inv_name}")
-                            break
+                            confirm_create = input(
+                                f"Do you want to create {current_inventory.inv_name}? [Y/N]: "
+                                ).lower().strip()
+                            if confirm_create == "y":
+                                # inventory creation
+                                create_csv_file(current_inventory.inv_name)
+                                loading_notices(
+                                    f"\"{current_inventory.inv_name}\" inventory created",
+                                    f"opening {current_inventory.inv_name} inventory...",
+                                    )
+                                selected_option = "Inventory Menu"
+                                selected_inventory_file = current_inventory.inv_name
+                                break
+                            elif confirm_create == "n":
+                                # cancellation of creation, returns to main menu
+                                loading_notices(
+                                    f"inventory creation cancelled",
+                                    f"returning to main menu...",
+                                )
+                                selected_option = "Main Menu"
+                                break
+                            else:
+                                # invalid confirmation (y/n) for inventory creation
+                                print(
+                                    "\nInvalid option \"y\" for Yes and \"n\" for No only\n".upper()
+                                    )
+                                continue
                         except (ValueError, NameError):
                             print("\n!!! Alphanumeric characters and underscore only !!!\n")
                             continue
                         except FileExistsError:
                             print("\n\n!!! Inventory already exists, please enter a different name !!!\n\n")
                             continue
-                    program_loading(
-                        f"\"{current_inventory.inv_name}\" inventory created",
-                        f"opening {current_inventory.inv_name} inventory",)
-                    selected_option = "Inventory Menu"
-                    selected_inventory_file = current_inventory.inv_name
 
                 case "Manage Existing Inventory":
                     # Read local directory for .csv files, and
@@ -254,6 +288,14 @@ def create_csv_file(filename):
         csv_writer = csv.writer(new_inv_file)
         csv_writer.writerow(["Item", "Expiry Date", "Quantity"])
 
+def delete_csv_file(filename) -> None:
+    """
+    created to prevent carrying over the selected_option = 'd'
+    when declining the delete prompt for the current inventory
+    """
+    os.remove(f"./inventories/{filename}.csv")
+    return "Manage Existing Inventory"
+
 def list_saved_csvs(my_path: str, map_function=None):
     """
     List all the saved CSV in the current directory
@@ -275,30 +317,16 @@ def remove_extension_from_file(filename: str):
     """
     if matches := re.search(r"^(.+)(\.\w+)$", f"{filename}", flags=re.IGNORECASE):
         return matches.group(1)
-    
-def warning_prompt(my_func, action_description: str = "NO DESC"):
-    print(f"!!! ARE YOU SURE YOU WANT TO {action_description}? !!!".upper())
-    while True:
-        yes_or_no = input("[Y/N]? ").lower()
-        match yes_or_no:
-            case "y":
-                my_func()
-                print(f"{action_description} successful".upper())
-            case "n":
-                print(f"{action_description} cancelled".upper())
-                raise KeyboardInterrupt
-            case _:
-                print("Type \"y\" for YES and \"n\" for NO")
-                continue
 
-def program_loading(notice: str, next_notice: str = ""):
-    print(f"\n\n{notice.upper()}\n\n")
-    sleep(1)
-    print("Loading, Please wait...\n".upper())
-    sleep(1.5)
-    if next_notice != "":
-        print(f"\n{next_notice}\n".upper())
-        sleep(1)
+# UI TEXT NOTICES
+def loading_notices(*notices: str):
+    """
+    iterable notices with time intervals in between
+    """
+    for notice in notices:
+        sleep(0.5)
+        print(f"\n\n{notice.upper()}\n")
+        sleep(1.2)
 
 def WIP():
     sys.exit("\n--- !!! WORK IN PROGRESS !!! ---\n")
