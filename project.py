@@ -1,6 +1,7 @@
 """
 FOOD INVENTORY MANAGEMENT
-by Jose Nichole C. Galenzoga (nordentesla / Northwind Creative)
+by Jose Nichole C. Galenzoga
+A.K.A.: nordentesla (Northwind Creative)
 
 Final Python project for Harvard University's CS50P course
     Requirements:
