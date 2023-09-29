@@ -126,107 +126,7 @@ class Inventory:
                 print("")
                 match user_input:
                     case "a":
-                        # item name input processing
-                        while True:
-                            item_name = input(
-                                "What is the name of the item? "
-                                ).strip()
-                            if re.search(r"^[A-Za-z]\w{2}\w*$", item_name):
-                                confirm_item_name = input(
-                                    f"Confirm Item Name: \"{item_name}\"?\n\n[Y/N]:"
-                                    ).lower()
-                                match confirm_item_name:
-                                    case "y":
-                                        break
-                                    case "n":
-                                        continue
-                                    case _:
-                                        print("Invalid input, Y or N only")
-                                        continue
-                            else:
-                                print("Item name must be 3 characters or more and starts with 2 letters".upper())
-                        # item expiry date input processing
-                        while True:
-                            try:
-                                item_expiry_date = input(
-                                    "What is the expiry date of the item?\n\nInput Date YYYY-MM-DD or YYYY-MM: "
-                                    ).strip()
-                                if matches := re.search(
-                                    r"^(2[0-1](2[3-9]|[3-9]\d)\d)-(0\d|1[0-2])(-([0-2]\d|3[0-1]))*$", 
-                                    item_name,
-                                    ):
-                                    expiry_year = int(matches.group(1))
-                                    expiry_month = int(matches.group(3))
-                                    if matches.group(5) == None:
-                                        expiry_day = 1
-                                    else:
-                                        expiry_day = int(matches.group(5))
-
-                                    if (item_expiry_date := datetime.date(expiry_year, expiry_month, expiry_day)) > datetime.datetime.now:
-                                        item_expiry_date = str(item_expiry_date)
-                                    else:
-                                        raise ValueError("Invalid expiry date: date should be later than today")
-                                    confirm_expiry_date = input(
-                                        f"Confirm Expiry Date: \"{item_expiry_date}\"?\n\n[Y/N]:"
-                                        ).lower()
-                                    match confirm_expiry_date:
-                                        case "y":
-                                            break
-                                        case "n":
-                                            continue
-                                        case _:
-                                            print("Invalid input, Y or N only")
-                                            continue
-                                else:
-                                    print("Invalid expiry date, Check your format",
-                                        "Valid expiry dates are 2023-10-01 and beyond",
-                                        )
-                            except ValueError:
-                                continue
-                        # item name quantity processing
-                        while True:
-                            item_count = input(
-                                f"How many \"{item_name}\" item do you want to add to {self.inv_name}? "
-                                ).strip()
-                            if re.search(r"^\d{0,2}[1-9]$", item_count):
-                                item_count = int(item_count)
-                                confirm_item_count = input(
-                                    f"Confirm Item to be Added \"{item_expiry_date}\"?\n\n[Y/N]:"
-                                    ).lower()
-                                match confirm_item_count:
-                                    case "y":
-                                        break
-                                    case "n":
-                                        continue
-                                    case _:
-                                        print("Invalid input, Y or N only")
-                                        continue
-                            else:
-                                print("Invalid quantity, input a number more than 0")
-                                continue
-                        
-                        item_for_appending = [item_name, item_expiry_date, item_count]
-
-                        with open(f"./inventories/{self.inv_name}.csv", "a") as my_csv:
-                            csv_writer = csv.DictWriter(
-                                my_csv, fieldnames=["Item","Expiry Date","Quantity"]
-                                )
-                            # existing item
-                            if f"{item_name},{item_expiry_date}" in my_csv:
-                                # find a way to move the cursor to the existing item
-                                # find a way to add the input count to the existing count
-                                # max item (999) should return an error if it exceeded the max item count after addition
-                                WIP()
-                            else:
-                                csv_writer.writerow({"Item": item_name, 
-                                                    "Expiry Date": item_expiry_date,
-                                                    "Quantity": item_count
-                                                    })
-                        # join inputs into an item list
-                        # append inputed list into the file
-                        # print a notice that the file is saved
-                        # print the item list of the inventory
-                        WIP()
+                        self.add_item()
                     case "r":
                         # open the csv file
                         # parse the csv file
@@ -238,60 +138,9 @@ class Inventory:
                         # if the item yields to 0, remove the item from the .csv file
                         WIP()
                     case "e":
-                        while True:
-                            confirm_create_pdf: str = (
-                                input(
-                                    f"Do you want to export {self.inv_name.upper()} as PDF? [Y/N]: "
-                                )
-                                .lower()
-                                .strip()
-                            )
-                            if confirm_create_pdf == "y":
-                                pdf_maker(self.inv_name, self.storage)
-                                loading_notices(
-                                    f"{self.inv_name} inventory exported as pdf",
-                                    'pdf file saved at "saved-pdf" folder',
-                                    "returning to inventory menu...",
-                                )
-                                return "Inventory Menu"
-                            elif confirm_create_pdf == "n":
-                                loading_notices(
-                                    "export as pdf cancelled",
-                                    "returning to inventory menu...",
-                                )
-                                return "Inventory Menu"
-                            else:
-                                print(
-                                    '\nInvalid option "y" for Yes and "n" for No only\n'.upper()
-                                )
-                                continue
+                        self.export_pdf()
                     case "d":
-                        while True:
-                            confirm_delete: str = (
-                                input(
-                                    f"Are you sure you want to delete {self.inv_name.upper()}? [Y/N]: "
-                                )
-                                .lower()
-                                .strip()
-                            )
-                            if confirm_delete == "y":
-                                delete_csv_file(self.inv_name)
-                                loading_notices(
-                                    f"{self.inv_name} deleted!",
-                                    "returning to my inventories menu",
-                                )
-                                return "Manage Existing Inventory"
-                            elif confirm_delete == "n":
-                                loading_notices(
-                                    f"deletion cancelled",
-                                    f"returning to {self.inv_name} options menu",
-                                )
-                                return "Inventory Menu"
-                            else:
-                                print(
-                                    '\nInvalid option "y" for Yes and "n" for No only\n'.upper()
-                                )
-                                continue
+                        self.delete_inventory()
                     case "i":
                         return "Manage Existing Inventory"
                     case "0":
@@ -301,6 +150,162 @@ class Inventory:
                         continue
             except KeyboardInterrupt:
                 return "Exit Program"
+            
+    def add_item(self):
+        # item name input processing
+        while True:
+            item_name = input(
+                "What is the name of the item? "
+                ).strip()
+            if re.search(r"^[A-Za-z]\w{2}\w*$", item_name):
+                confirm_item_name = input(
+                    f"Confirm Item Name: \"{item_name}\"?\n\n[Y/N]:"
+                    ).lower()
+                match confirm_item_name:
+                    case "y":
+                        break
+                    case "n":
+                        continue
+                    case _:
+                        print("Invalid input, Y or N only")
+                        continue
+            else:
+                print("Item name must be 3 characters or more and starts with 2 letters".upper())
+        # item expiry date input processing
+        while True:
+            try:
+                item_expiry_date = input(
+                    "What is the expiry date of the item?\n\nInput Date YYYY-MM-DD or YYYY-MM: "
+                    ).strip()
+                if matches := re.search(
+                    r"^(2[0-1](2[3-9]|[3-9]\d))-(0\d|1[0-2])(-([0-2]\d|3[0-1]))*$", 
+                    item_expiry_date,
+                    ):
+                    expiry_year = int(matches.group(1))
+                    expiry_month = int(matches.group(3))
+                    if matches.group(5) == None:
+                        expiry_day = 1
+                    else:
+                        expiry_day = int(matches.group(5))
+                    if (item_expiry_date := datetime.date(expiry_year, expiry_month, expiry_day)) > datetime.date.today():
+                        item_expiry_date = str(item_expiry_date)
+                    else:
+                        raise ValueError("Invalid expiry date: date should be later than today")
+                    confirm_expiry_date = input(
+                        f"Confirm Expiry Date: \"{item_expiry_date}\"?\n\n[Y/N]:"
+                        ).lower()
+                    match confirm_expiry_date:
+                        case "y":
+                            break
+                        case "n":
+                            continue
+                        case _:
+                            print("Invalid input, Y or N only")
+                            continue
+                else:
+                    print("Invalid expiry date, Check your format")
+            except ValueError:
+                continue
+        # item name quantity processing
+        while True:
+            item_count = input(
+                f"How many \"{item_name}\" item do you want to add to {self.inv_name}? "
+                ).strip()
+            if re.search(r"^\d{0,2}[1-9]$", item_count):
+                item_count = int(item_count)
+                confirm_item_count = input(
+                    f"Confirm Item to be Added \"{item_expiry_date}\"?\n\n[Y/N]:"
+                    ).lower()
+                match confirm_item_count:
+                    case "y":
+                        break
+                    case "n":
+                        continue
+                    case _:
+                        print("Invalid input, Y or N only")
+                        continue
+            else:
+                print("Invalid quantity, input a number more than 0")
+                continue
+        
+        item_for_appending = [item_name, item_expiry_date, item_count]
+
+        with open(f"./inventories/{self.inv_name}.csv", "a") as my_csv:
+            csv_writer = csv.DictWriter(
+                my_csv, fieldnames=["Item","Expiry Date","Quantity"]
+                )
+            # existing item
+            if f"{item_name},{item_expiry_date}" in my_csv:
+                # find a way to move the cursor to the existing item
+                # find a way to add the input count to the existing count
+                # max item (999) should return an error if it exceeded the max item count after addition
+                WIP()
+            else:
+                csv_writer.writerow({"Item": item_name, 
+                                    "Expiry Date": item_expiry_date,
+                                    "Quantity": item_count
+                                    })
+        # join inputs into an item list
+        # append inputed list into the file
+        # print a notice that the file is saved
+        # print the item list of the inventory
+        WIP()
+
+    def export_pdf(self):
+        while True:
+            confirm_create_pdf: str = (
+                input(
+                    f"Do you want to export {self.inv_name.upper()} as PDF? [Y/N]: "
+                )
+                .lower()
+                .strip()
+            )
+            if confirm_create_pdf == "y":
+                pdf_maker(self.inv_name, self.storage)
+                loading_notices(
+                    f"{self.inv_name} inventory exported as pdf",
+                    'pdf file saved at "saved-pdf" folder',
+                    "returning to inventory menu...",
+                )
+                return "Inventory Menu"
+            elif confirm_create_pdf == "n":
+                loading_notices(
+                    "export as pdf cancelled",
+                    "returning to inventory menu...",
+                )
+                return "Inventory Menu"
+            else:
+                print(
+                    '\nInvalid option "y" for Yes and "n" for No only\n'.upper()
+                )
+                continue
+    def delete_inventory(self):
+        while True:
+            confirm_delete: str = (
+                input(
+                    f"Are you sure you want to delete {self.inv_name.upper()}? [Y/N]: "
+                )
+                .lower()
+                .strip()
+            )
+            if confirm_delete == "y":
+                delete_csv_file(self.inv_name)
+                loading_notices(
+                    f"{self.inv_name} deleted!",
+                    "returning to my inventories menu",
+                )
+                return "Manage Existing Inventory"
+            elif confirm_delete == "n":
+                loading_notices(
+                    f"deletion cancelled",
+                    f"returning to {self.inv_name} options menu",
+                )
+                return "Inventory Menu"
+            else:
+                print(
+                    '\nInvalid option "y" for Yes and "n" for No only\n'.upper()
+                )
+                continue
 
     def item_option(self):
         while True:
