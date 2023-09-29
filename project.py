@@ -1,6 +1,6 @@
 """
 FOOD INVENTORY MANAGEMENT
-by Jose Nichole C. Galenzoga (nordentesla)
+by Jose Nichole C. Galenzoga (nordentesla / Northwind Creative)
 
 Final Python project for Harvard University's CS50P course
     Requirements:
@@ -147,7 +147,7 @@ class Inventory:
                         while True:
                             confirm_create_pdf: str = (
                                 input(
-                                    f"Do you want to export {self.inv_name.upper()} as PDF?[Y/N]: "
+                                    f"Do you want to export {self.inv_name.upper()} as PDF? [Y/N]: "
                                 )
                                 .lower()
                                 .strip()
@@ -300,7 +300,7 @@ def main():
 
                 case "Manage Existing Inventory":
                     # Read local directory for .csv files, and
-                    csv_files = list_saved_csvs(
+                    csv_files = list_saved_inventory_csvs(
                         "./inventories", remove_extension_from_file
                     )
 
@@ -358,7 +358,7 @@ def delete_csv_file(filename):
     return "Manage Existing Inventory"
 
 
-def list_saved_csvs(my_path: str, map_function=None):
+def list_saved_inventory_csvs(my_path: str, map_function=None):
     """
     List all the saved CSV in the current directory
     map_function is optional, uses map to apply function to list items
@@ -368,17 +368,20 @@ def list_saved_csvs(my_path: str, map_function=None):
     file_list = list(
         filter(lambda x: x.endswith(".csv"), list(os.listdir(path=my_path)))
     )
-    # second filter: if has valid header:
+    # second filter: all .csv file should have a valid header:
     file_list = list(
-        filter(lambda x: "Item,\"Expiry Date\",Quantity\n" in open(f"./inventories/{x}"), file_list)
+        filter(lambda x: re.search(
+            r"^Item,\"?Expiry Date\"?,Quantity\n?$",
+            list(open(f"./inventories/{x}", "r"))[0],
+            ), file_list)
     )
     # file list modifier
     if map_function != None:
         modified_file_list = []
         for item in file_list:
             modified_file_list.append([map_function(item)])
-        return modified_file_list
-    return file_list
+        return sorted(modified_file_list)
+    return sorted(file_list)
 
 
 def pdf_maker(pdf_filename: str, inventory_list: list):
@@ -396,16 +399,26 @@ def pdf_maker(pdf_filename: str, inventory_list: list):
     my_pdf.ln(15)
     # creates table from data, taken from FPDF2 documentation, for further study
     my_pdf.set_font(family="helvetica", size=15)
-    with my_pdf.table() as pdf_table:
-        for data_row in inventory_list:
-            row = pdf_table.row()
-            for datum in data_row:
-                row.cell(datum)
+    if len(inventory_list) == 1:
+        # for inventory with no items
+        my_pdf.ln(10)
+        my_pdf.set_font(family="helvetica", size=20, style="B")
+        my_pdf.cell(txt="! no items in this inventory !".upper(),
+                    center=True,)
+        my_pdf.ln(30)
+    else:
+        # for inventory with valid items
+        with my_pdf.table() as pdf_table:
+            for data_row in inventory_list:
+                row = pdf_table.row()
+                for datum in data_row:
+                    row.cell(datum)
     # program signature
     my_pdf.ln(4)
     my_pdf.set_font(family="helvetica", size=10)
     my_pdf.cell(
-        txt="Created with Food Inventory Management by nordentesla", center=True
+        txt="Created with Food Inventory Management by nordentesla / Northwind Creative", 
+        center=True,
     )
     # saving PDF file
     my_pdf.output(name=f"./saved-pdf/{pdf_filename}.pdf")
