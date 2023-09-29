@@ -79,6 +79,7 @@ class Inventory:
         self.storage = storage
         self.filename_with_extension = str
         self.match = str
+        self.item: list = [str, datetime, int]
 
     def __str__(self):
         return f"\n\nINVENTORY: {self.inv_name}, CONTAINING {self.storage[0]}\n\n"
@@ -125,10 +126,102 @@ class Inventory:
                 print("")
                 match user_input:
                     case "a":
-                        # open the csv file
-                        # parse the csv file
-                        # ask for input: item name, expiry date, quantity
-                        # process the inputs for verification (preferably each inputs)
+                        # item name input processing
+                        while True:
+                            item_name = input(
+                                "What is the name of the item? "
+                                ).strip()
+                            if re.search(r"^[A-Za-z]\w{2}\w*$", item_name):
+                                confirm_item_name = input(
+                                    f"Confirm Item Name: \"{item_name}\"?\n\n[Y/N]:"
+                                    ).lower()
+                                match confirm_item_name:
+                                    case "y":
+                                        break
+                                    case "n":
+                                        continue
+                                    case _:
+                                        print("Invalid input, Y or N only")
+                                        continue
+                            else:
+                                print("Item name must be 3 characters or more and starts with 2 letters".upper())
+                        # item expiry date input processing
+                        while True:
+                            try:
+                                item_expiry_date = input(
+                                    "What is the expiry date of the item?\n\nInput Date YYYY-MM-DD or YYYY-MM: "
+                                    ).strip()
+                                if matches := re.search(
+                                    r"^(2[0-1](2[3-9]|[3-9]\d)\d)-(0\d|1[0-2])(-([0-2]\d|3[0-1]))*$", 
+                                    item_name,
+                                    ):
+                                    expiry_year = int(matches.group(1))
+                                    expiry_month = int(matches.group(3))
+                                    if matches.group(5) == None:
+                                        expiry_day = 1
+                                    else:
+                                        expiry_day = int(matches.group(5))
+
+                                    if (item_expiry_date := datetime.date(expiry_year, expiry_month, expiry_day)) > datetime.datetime.now:
+                                        item_expiry_date = str(item_expiry_date)
+                                    else:
+                                        raise ValueError("Invalid expiry date: date should be later than today")
+                                    confirm_expiry_date = input(
+                                        f"Confirm Expiry Date: \"{item_expiry_date}\"?\n\n[Y/N]:"
+                                        ).lower()
+                                    match confirm_expiry_date:
+                                        case "y":
+                                            break
+                                        case "n":
+                                            continue
+                                        case _:
+                                            print("Invalid input, Y or N only")
+                                            continue
+                                else:
+                                    print("Invalid expiry date, Check your format",
+                                        "Valid expiry dates are 2023-10-01 and beyond",
+                                        )
+                            except ValueError:
+                                continue
+                        # item name quantity processing
+                        while True:
+                            item_count = input(
+                                f"How many \"{item_name}\" item do you want to add to {self.inv_name}? "
+                                ).strip()
+                            if re.search(r"^\d{0,2}[1-9]$", item_count):
+                                item_count = int(item_count)
+                                confirm_item_count = input(
+                                    f"Confirm Item to be Added \"{item_expiry_date}\"?\n\n[Y/N]:"
+                                    ).lower()
+                                match confirm_item_count:
+                                    case "y":
+                                        break
+                                    case "n":
+                                        continue
+                                    case _:
+                                        print("Invalid input, Y or N only")
+                                        continue
+                            else:
+                                print("Invalid quantity, input a number more than 0")
+                                continue
+                        
+                        item_for_appending = [item_name, item_expiry_date, item_count]
+
+                        with open(f"./inventories/{self.inv_name}.csv", "a") as my_csv:
+                            csv_writer = csv.DictWriter(
+                                my_csv, fieldnames=["Item","Expiry Date","Quantity"]
+                                )
+                            # existing item
+                            if f"{item_name},{item_expiry_date}" in my_csv:
+                                # find a way to move the cursor to the existing item
+                                # find a way to add the input count to the existing count
+                                # max item (999) should return an error if it exceeded the max item count after addition
+                                WIP()
+                            else:
+                                csv_writer.writerow({"Item": item_name, 
+                                                    "Expiry Date": item_expiry_date,
+                                                    "Quantity": item_count
+                                                    })
                         # join inputs into an item list
                         # append inputed list into the file
                         # print a notice that the file is saved
@@ -238,7 +331,7 @@ def main():
     # Initial selection
     main_menu = ProgramMenu(
         "Main Menu",
-        [["New Inventory"], ["Manage Existing Inventory"], ["Exit Program"]],
+        [["New Inventory"], ["Manage Existing Inventory"], ["About this Program"], ["Exit Program"]],
     )
     splash_screen()
     selected_option: str = "Main Menu"
@@ -324,6 +417,9 @@ def main():
                     if option := current_inventory.special_option():
                         selected_option = option
 
+                case "About this Program":
+                    WIP()
+
                 case "Exit Program":
                     sys.exit(
                         "\n\n|----- Program Closed, Thank you for using the Program! -----|\n\n"
@@ -367,13 +463,13 @@ def list_saved_inventory_csvs(my_path: str, map_function=None):
     """
     # first filter: all .csv file in the directory
     file_list = list(
-        filter(lambda x: x.endswith(".csv"), list(os.listdir(path=my_path)))
+        filter(lambda file: file.endswith(".csv"), list(os.listdir(path=my_path)))
     )
     # second filter: all .csv file should have a valid header:
     file_list = list(
-        filter(lambda x: re.search(
+        filter(lambda file: re.search(
             r"^Item,\"?Expiry Date\"?,Quantity\n?$",
-            list(open(f"./inventories/{x}", "r"))[0],
+            list(open(f"./inventories/{file}", "r"))[0],
             ), file_list)
     )
     # file list modifier
