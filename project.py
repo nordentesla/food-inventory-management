@@ -122,7 +122,7 @@ class Inventory:
         )
         while True:
             try:
-                user_input = input(f"===> {self.inv_name.upper()} - Type the Option: ")
+                user_input = input(f"===> Inventory Menu: {self.inv_name.upper()} - Type the Option: ")
                 print("")
                 match user_input:
                     case "a":
@@ -423,7 +423,28 @@ def main():
                         selected_option = option
 
                 case "About this Program":
-                    WIP()
+                    def about():
+                        """
+                        The program is called Food Inventory 
+                        Management. It is a program that is 
+                        used to manage food inventory in the 
+                        household. This was created to fulfill 
+                        the requirements of Harvard University's 
+                        CS50P final project.
+
+                        See ReadMe for more information:
+                        https://github.com/nordentesla/food-inventory-management
+                        """
+                    try:
+                        print(about.__doc__)
+                        loading_notices("Press Ctrl + C to go back to main menu",
+                            "(Will automatically go to main menu after 10 seconds)",
+                            )
+                        sleep(9)
+                        selected_option = "Main Menu"
+                    except KeyboardInterrupt:
+                        selected_option = "Main Menu"
+                        
 
                 case "Exit Program":
                     sys.exit(
@@ -541,7 +562,7 @@ def loading_notices(*notices: str):
     """
     for notice in notices:
         sleep(0.5)
-        print(f"\n\n{notice.upper()}\n")
+        print(f"\n{notice.upper()}\n")
         sleep(1.2)
 
 
