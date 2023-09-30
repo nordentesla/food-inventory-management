@@ -32,6 +32,10 @@ from fpdf import FPDF
 
 
 class ProgramMenu:
+    """
+    ProgramMenu class, blueprint for the different menus
+    that provides a simple GUI in the terminal
+    """
     def __init__(self, ui_name, ui_menu):
         self.ui_name: str = ui_name
         self.ui_menu: list[list] = ui_menu
@@ -74,6 +78,9 @@ class ProgramMenu:
 
 
 class Inventory:
+    """
+    Class to initialize an inventory object for data manipulation
+    """
     def __init__(self, inv_name: str, storage: list[list] = [[]]):
         self.inv_name = inv_name
         self.storage = storage
@@ -93,40 +100,39 @@ class Inventory:
             my_csv = csv.reader(file)
             for row in my_csv:
                 self.storage.append(row)
-        print("-------------------------------------------------\n")
-        print(f"|=====----- {self.inv_name.upper()} -----=====|")
-        print(
-            tabulate(
+        # Prints the following:
+        # Title, inventory table, table description, and inventory menu options
+        print("-------------------------------------------------\n",
+              f"|=====----- {self.inv_name.upper()} -----=====|",
+              tabulate(
                 self.storage,
                 tablefmt="simple_grid",
                 headers="firstrow",
                 showindex=list(
                     map(lambda x: x + 1, list(range(len(self.storage) - 1)))
                 ),
-            )
-        )
-        print(f"!--- {self.inv_name} has {len(self.storage)-1} item(s) ---!".upper())
-
-    def special_option(self):
-        print("")
-        print(f"{self.inv_name.upper()} OPTIONS:\n")
-        print(
+            ),
+            f"!--- {self.inv_name} has {len(self.storage)-1} item(s) ---!".upper(),
+            "",
+            f"{self.inv_name.upper()} OPTIONS:",
             f"Type 'a' => Add an Item to {self.inv_name.upper()}",
             f"Type 'r' => Remove an Item from {self.inv_name.upper()}",
             f"Type 'e' => Export \"{self.inv_name.upper()}\" inventory list as PDF",
             f"Type 'd' => Delete \"{self.inv_name.upper()}\" Inventory",
             "Type 'i' => Back to My Inventories",
             "Type '0' => Back to Main Menu",
-            sep="\n",
-            end="\n\n\n",
-        )
+            sep="\n", end="\n\n\n")
+
+    def special_option(self):
         while True:
             try:
                 user_input = input(f"===> Inventory Menu: {self.inv_name.upper()} - Type the Option: ")
                 print("")
                 match user_input:
                     case "a":
-                        self.add_item()
+                        WIP()
+                        return "Inventory Menu"
+                        # return self.add_item()
                     case "r":
                         # open the csv file
                         # parse the csv file
@@ -137,10 +143,11 @@ class Inventory:
                         # subtract the quantity from the item
                         # if the item yields to 0, remove the item from the .csv file
                         WIP()
+                        return "Inventory Menu"
                     case "e":
-                        self.export_pdf()
+                        return self.export_pdf()
                     case "d":
-                        self.delete_inventory()
+                        return self.delete_inventory()
                     case "i":
                         return "Manage Existing Inventory"
                     case "0":
@@ -227,8 +234,6 @@ class Inventory:
             else:
                 print("Invalid quantity, input a number more than 0")
                 continue
-        
-        item_for_appending = [item_name, item_expiry_date, item_count]
 
         with open(f"./inventories/{self.inv_name}.csv", "a") as my_csv:
             csv_writer = csv.DictWriter(
@@ -260,25 +265,28 @@ class Inventory:
                 .lower()
                 .strip()
             )
-            if confirm_create_pdf == "y":
-                pdf_maker(self.inv_name, self.storage)
-                loading_notices(
-                    f"{self.inv_name} inventory exported as pdf",
-                    'pdf file saved at "saved-pdf" folder',
-                    "returning to inventory menu...",
-                )
-                return "Inventory Menu"
-            elif confirm_create_pdf == "n":
-                loading_notices(
-                    "export as pdf cancelled",
-                    "returning to inventory menu...",
-                )
-                return "Inventory Menu"
-            else:
-                print(
-                    '\nInvalid option "y" for Yes and "n" for No only\n'.upper()
-                )
-                continue
+            match confirm_create_pdf:
+                case "y":
+                    pdf_maker(self.inv_name, self.storage)
+                    loading_notices(
+                        f"{self.inv_name} inventory exported as pdf",
+                        "pdf file saved at \"saved-pdf\" folder",
+                        "returning to inventory menu...",
+                    )
+                    return "Inventory Menu"
+                case "n":
+                    loading_notices(
+                        "export as pdf cancelled",
+                        "returning to inventory menu...",
+                    )
+                    return "Inventory Menu"
+                case _:
+                    print(
+                        "\nInvalid option \"y\" for Yes and \"n\" for No only\n".upper()
+                    )
+                    continue
+
+
     def delete_inventory(self):
         while True:
             confirm_delete: str = (
@@ -288,24 +296,26 @@ class Inventory:
                 .lower()
                 .strip()
             )
-            if confirm_delete == "y":
-                delete_csv_file(self.inv_name)
-                loading_notices(
-                    f"{self.inv_name} deleted!",
-                    "returning to my inventories menu",
-                )
-                return "Manage Existing Inventory"
-            elif confirm_delete == "n":
-                loading_notices(
+            match confirm_delete:
+                case "y":
+                    delete_csv_file(self.inv_name)
+                    loading_notices(
+                        f"{self.inv_name} deleted!",
+                        "returning to my manage existing inventories menu",
+                    )
+                    return "Manage Existing Inventory"
+                case "n":
+                    loading_notices(
                     f"deletion cancelled",
                     f"returning to {self.inv_name} options menu",
-                )
-                return "Inventory Menu"
-            else:
-                print(
-                    '\nInvalid option "y" for Yes and "n" for No only\n'.upper()
-                )
-                continue
+                    )
+                    return "Inventory Menu"
+                case _:
+                    print(
+                    "\nInvalid option \"y\" for Yes and \"n\" for No only\n".upper()
+                    )
+                    continue
+                
 
     def item_option(self):
         while True:
@@ -383,7 +393,7 @@ def main():
                             else:
                                 # invalid confirmation (y/n) for inventory creation
                                 print(
-                                    '\nInvalid option "y" for Yes and "n" for No only\n'.upper()
+                                    "\nInvalid option \"y\" for Yes and \"n\" for No only\n".upper()
                                 )
                                 continue
                         except (ValueError, NameError):
@@ -461,9 +471,9 @@ def splash_screen():
     """
     Prints the program splash screen
     """
-    print(Figlet().renderText("Food Inventory Management"))
-    print('----- "A handy inventory management program for your food" -----\n')
-    print("** by ~nordentesla~ **\n")
+    print(Figlet().renderText("Food Inventory Management"),
+          "----- \"A handy inventory management program for your food\" -----\n",
+          sep="\n")
 
 
 def create_csv_file(filename):
@@ -536,6 +546,10 @@ def pdf_maker(pdf_filename: str, inventory_list: list):
                 row = pdf_table.row()
                 for datum in data_row:
                     row.cell(datum)
+        my_pdf.ln(4)
+        my_pdf.set_font(family="helvetica", size=15)
+        my_pdf.cell(txt="!-- end of the list --!".upper(), center=True)
+        my_pdf.ln(4)
     # program signature
     my_pdf.ln(4)
     my_pdf.set_font(family="helvetica", size=10)
