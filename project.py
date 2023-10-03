@@ -89,8 +89,8 @@ class Inventory:
         self.inv_name = inv_name
         self.storage = storage
         self.filename_with_extension = str
-        self.match = str
-        self.item: list = [str, datetime, int]
+        # initialization of current inventory item list as data frame
+        self.dataframe = pd.read_csv(f"./inventories/{self.inv_name}.csv")
 
     def __str__(self):
         return f"\n\nINVENTORY: {self.inv_name}, CONTAINING {self.storage[0]}\n\n"
@@ -161,7 +161,7 @@ class Inventory:
         # item name input processing
         while True:
             item_name = input("What is the name of the item? ").strip().title()
-            if re.search(r"^[A-Za-z]\w{2}[\w ]*$", item_name):
+            if re.search(r"^[A-Za-z][\w ]{2}[\w ]*$", item_name):
                 confirm_item_name = input(
                     f"Confirm Item Name: '{item_name}'?\n\n[Y/N]:"
                 ).lower()
@@ -245,17 +245,19 @@ class Inventory:
                 print("Invalid quantity, input a number more than 0")
                 continue
 
-        current_item_list = pd.read_csv(f"./inventories/{self.inv_name}.csv")
-        item_to_add = pd.DataFrame([{"Item": item_name, "Expiry Date": item_expiry_date, "Quantity": item_count}])
-        print(current_item_list)
-        print("", item_to_add, sep="\n")
-
-        # join inputs into an item list
-        # append inputed list into the file
-        # print a notice that the file is saved
-        # print the item list of the inventory
-        WIP()
+        # indexing of all items to verify if the item to be added already exists
+        item_exists: bool = False
+        items = list(self.dataframe["Item"])
+        dates = list(self.dataframe["Expiry Date"])
+        for i in range(len(items)):
+            if item_name == items[i] and item_expiry_date == dates[i]:
+                item_exists = True
+                # TODO add the quantity to the existing quantity
+        if item_exists == False:
+            # TODO add the input item into the inventory dataframe
+        # TODO save current dataframe to the csv file
         # addition of item done, returns to current inventory menu
+        WIP()
         return "Inventory Menu"
 
     def remove_item(self):
@@ -614,7 +616,7 @@ def WIP():
     """
     placeholder for work in progress functions/objects
     """
-    print("\n--- !!! WORK IN PROGRESS !!! ---\n")
+    sys.exit("\n--- !!! WORK IN PROGRESS !!! ---\n")
 
 
 if __name__ == "__main__":
