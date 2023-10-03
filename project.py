@@ -253,22 +253,28 @@ class Inventory:
             if item_name == items[i] and item_expiry_date == dates[i]:
                 item_exists = True
                 # TODO add the quantity to the existing quantity
+                WIP()
         if item_exists == False:
             # TODO add the input item into the inventory dataframe
+            self.dataframe = pd.concat(
+                [
+                    self.dataframe, 
+                    pd.DataFrame([{"Item":item_name, "Expiry Date":item_expiry_date, "Quantity":item_count}])
+                    ],
+                ignore_index=True)
         # TODO save current dataframe to the csv file
+        self.dataframe.to_csv(path_or_buf=f"./inventories/{self.inv_name}.csv", mode="w", index=False)
         # addition of item done, returns to current inventory menu
-        WIP()
+        loading_notices("item added!", "returning to inventory menu...")
         return "Inventory Menu"
 
     def remove_item(self):
-        # open the csv file
-        # parse the csv file
-        # select item number from the inventory
-        # ask user for input for quantity to be removed
-        # verify if the input is a valid integer, and less than the item quantity
-        # prompt the user if they wish to proceed with the inputted quantity to be removed
-        # subtract the quantity from the item
-        # if the item yields to 0, remove the item from the .csv file
+        # TODO select item number from the inventory
+        # TODO ask user for input for quantity to be removed
+        # TODO verify if the input is a valid integer, and less than the item quantity
+        # TODO prompt the user if they wish to proceed with the inputted quantity to be removed
+        # TODO subtract the quantity from the item
+        # TODO if the item yields to 0, remove the item from the .csv file
         WIP()
         return "Inventory Menu"
 

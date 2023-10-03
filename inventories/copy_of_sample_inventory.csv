@@ -1,4 +1,6 @@
-Item,"Expiry Date",Quantity
-"Sample Food",2024-01-01,1
-"Another Sample Food",2024-12-31,3
-"Lasagna",2023-12-31,1
+Item,Expiry Date,Quantity
+Sample Food,2024-01-01,1
+Another Sample Food,2024-12-31,3
+Lasagna,2023-12-31,1
+Truffle,2025-01-01,1
+Carbonara,2026-01-01,1
