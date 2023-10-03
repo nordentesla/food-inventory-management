@@ -222,7 +222,7 @@ class Inventory:
                     print("Invalid expiry date, Check your format")
             except ValueError:
                 continue
-        # item name quantity processing
+        # item quantity processing
         while True:
             item_count = input(
                 f"How many '{item_name}' item do you want to add to {self.inv_name}? "
@@ -230,10 +230,10 @@ class Inventory:
             # max item should be 999
             if re.search(r"^\d{0,2}[1-9]$", item_count):
                 item_count = int(item_count)
-                confirm_item_count = input(
-                    f'Confirm Item to be Added "{item_expiry_date}"?\n\n[Y/N]:'
+                confirm_item_to_destroy = input(
+                    f'Confirm Number of Items to be Added "{item_count}"?\n\n[Y/N]:'
                 ).lower()
-                match confirm_item_count:
+                match confirm_item_to_destroy:
                     case "y":
                         break
                     case "n":
@@ -246,33 +246,59 @@ class Inventory:
                 continue
 
         # indexing of all items to verify if the item to be added already exists
-        item_exists: bool = False
+        item_already_exists: bool = False
         items = list(self.dataframe["Item"])
         dates = list(self.dataframe["Expiry Date"])
         for i in range(len(items)):
             if item_name == items[i] and item_expiry_date == dates[i]:
-                item_exists = True
-                # TODO add the quantity to the existing quantity
-                WIP()
-        if item_exists == False:
-            # TODO add the input item into the inventory dataframe
+                item_already_exists = True
+                loading_notices(f"item '{item_name}' with expiry date '{item_expiry_date}' already exists", 
+                                "input quantity will be added...")
+                # Add the quantity to the existing quantity
+                self.dataframe.at[i,"Quantity"] = self.dataframe.at[i, "Quantity"] + item_count
+                break
+        if item_already_exists == False:
+            # Add the input item into the inventory dataframe
             self.dataframe = pd.concat(
                 [
                     self.dataframe, 
                     pd.DataFrame([{"Item":item_name, "Expiry Date":item_expiry_date, "Quantity":item_count}])
                     ],
                 ignore_index=True)
-        # TODO save current dataframe to the csv file
+        # Save current dataframe to the csv file
         self.dataframe.to_csv(path_or_buf=f"./inventories/{self.inv_name}.csv", mode="w", index=False)
-        # addition of item done, returns to current inventory menu
+        # Addition of item done, returns to current inventory menu
         loading_notices("item added!", "returning to inventory menu...")
         return "Inventory Menu"
 
     def remove_item(self):
         # TODO select item number from the inventory
-        # TODO ask user for input for quantity to be removed
-        # TODO verify if the input is a valid integer, and less than the item quantity
-        # TODO prompt the user if they wish to proceed with the inputted quantity to be removed
+        while True:
+            item_to_destroy = input("Type the Item Number to Remove/Reduce: ").strip()
+            if re.search(r"^\d+$", item_to_destroy):
+                ...
+            break
+        # TODO ask user for input for quantity to be removed, and verify if input is a valid integer
+        while True:
+            item_number_to_destroy = input(
+                f"How many '{item_to_destroy}' item do you want to remove from {self.inv_name}? "
+            ).strip()
+            if re.search(r"^\d{0,2}[1-9]$", item_number_to_destroy):
+                item_number_to_destroy = int(item_number_to_destroy)
+                confirm_item_to_destroy = input(
+                    f'Confirm Item to be Removed "{item_number_to_destroy}"?\n\n[Y/N]:'
+                ).lower()
+                match confirm_item_to_destroy:
+                    case "y":
+                        break
+                    case "n":
+                        continue
+                    case _:
+                        print("Invalid input, Y or N only")
+                        continue
+            else:
+                print("Invalid quantity, input a number more than 0 but not more than the item quantity")
+                continue
         # TODO subtract the quantity from the item
         # TODO if the item yields to 0, remove the item from the .csv file
         WIP()
