@@ -7,3 +7,5 @@ os
 re
 time
 fpdf2
+pandas
+numpy
