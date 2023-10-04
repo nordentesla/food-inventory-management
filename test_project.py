@@ -8,7 +8,7 @@ from project import create_csv_file
 # the food inventory management program
 def test_list_saved_inventory_csvs():
     assert list_saved_inventory_csvs("./inventories") == sorted(
-        ["freezer.csv", "pantry.csv", "refrigerator.csv"]
+        ["cooler.csv", "freezer.csv", "pantry.csv", "refrigerator.csv"]
         )
     assert list_saved_inventory_csvs(".") == []
 

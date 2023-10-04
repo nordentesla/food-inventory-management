@@ -47,9 +47,9 @@ class ProgramMenu:
         return len(input_list)
 
     def display_options(self):
-        print("-------------------------------------------------\n")
-        print(f"|=====----- {self.ui_name.upper()} -----=====|")
         print(
+            "-------------------------------------------------\n",
+            f"|=====----- {self.ui_name.upper()} -----=====|",
             tabulate(
                 self.ui_menu,
                 showindex=list(map(lambda x: x + 1, list(range(len(self.ui_menu))))),
@@ -93,7 +93,7 @@ class Inventory:
         try:
             self.dataframe: pd.DataFrame = pd.read_csv(
                 f"./inventories/{self.inv_name}.csv"
-                )
+            )
         except FileNotFoundError:
             pass
 
@@ -285,6 +285,10 @@ class Inventory:
                 [self.dataframe, item_to_add],
                 ignore_index=True,
             )
+        # Sort current inventory list ascending for dates
+        self.dataframe = self.dataframe.sort_values(by=["Expiry Date"]).reset_index(
+            drop=True
+        )
         # Save current dataframe to the csv file
         self.dataframe.to_csv(
             path_or_buf=f"./inventories/{self.inv_name}.csv", mode="w", index=False
@@ -378,8 +382,11 @@ class Inventory:
                     "Invalid quantity, input a number more than 0 but not more than the item quantity"
                 )
                 continue
+        # Sort current inventory list ascending for dates
+        self.dataframe = self.dataframe.sort_values(by=["Expiry Date"]).reset_index(
+            drop=True
+        )
         # Save current dataframe to the csv file after removal/reduction of items
-        print(self.dataframe)
         self.dataframe.to_csv(
             path_or_buf=f"./inventories/{self.inv_name}.csv",
             mode="w",
@@ -599,6 +606,7 @@ def main():
                         selected_option = "Main Menu"
 
                 case "Exit Program":
+                    loading_notices("exiting program...")
                     sys.exit(
                         "\n\n|----- Program Closed, Thank you for using the Program! -----|\n\n"
                     )
