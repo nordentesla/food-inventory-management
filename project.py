@@ -89,7 +89,13 @@ class Inventory:
         self.storage = storage
         self.filename_with_extension = str
         # initialization of current inventory item list as data frame
-        self.dataframe: pd.DataFrame = pd.read_csv(f"./inventories/{self.inv_name}.csv")
+        # try-except statement for new inventories initialization
+        try:
+            self.dataframe: pd.DataFrame = pd.read_csv(
+                f"./inventories/{self.inv_name}.csv"
+                )
+        except FileNotFoundError:
+            pass
 
     def __str__(self):
         return f"\n\nINVENTORY: {self.inv_name}, CONTAINING {self.storage[0]}\n\n"
@@ -615,9 +621,13 @@ def splash_screen():
 
 
 def create_csv_file(filename):
-    with open(f"./inventories/{filename}.csv", "x") as new_inv_file:
-        csv_writer = csv.writer(new_inv_file)
-        csv_writer.writerow(["Item", "Expiry Date", "Quantity"])
+    try:
+        with open(f"./inventories/{filename}.csv", "x") as new_inv_file:
+            csv_writer = csv.writer(new_inv_file)
+            csv_writer.writerow(["Item", "Expiry Date", "Quantity"])
+    except FileExistsError:
+        # Raises FileExistsError again to induce the try-except statement outside this function
+        raise FileExistsError
 
 
 def delete_csv_file(filename):

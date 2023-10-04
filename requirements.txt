@@ -8,3 +8,4 @@ re
 time
 fpdf2
 pandas
+pytest
