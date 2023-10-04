@@ -30,7 +30,6 @@ import re
 from time import sleep
 from fpdf import FPDF
 import pandas as pd
-import numpy as np
 
 
 class ProgramMenu:
@@ -726,13 +725,6 @@ def loading_notices(*notices: str):
         sleep(0.5)
         print(f"\n{notice.upper()}\n")
         sleep(1.2)
-
-
-def WIP():
-    """
-    placeholder for work in progress functions/objects
-    """
-    sys.exit("\n--- !!! WORK IN PROGRESS !!! ---\n")
 
 
 if __name__ == "__main__":
