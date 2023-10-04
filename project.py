@@ -56,7 +56,7 @@ class ProgramMenu:
                 tablefmt="simple_grid",
             ),
             "\n",
-            sep="\n"
+            sep="\n",
         )
 
     def input_option(self):
