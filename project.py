@@ -90,7 +90,7 @@ class Inventory:
         self.storage = storage
         self.filename_with_extension = str
         # initialization of current inventory item list as data frame
-        self.dataframe = pd.read_csv(f"./inventories/{self.inv_name}.csv")
+        self.dataframe: pd.DataFrame = pd.read_csv(f"./inventories/{self.inv_name}.csv")
 
     def __str__(self):
         return f"\n\nINVENTORY: {self.inv_name}, CONTAINING {self.storage[0]}\n\n"
@@ -130,7 +130,6 @@ class Inventory:
             end="\n\n\n",
         )
 
-
     def special_option(self):
         while True:
             try:
@@ -158,6 +157,12 @@ class Inventory:
                 return "Exit Program"
 
     def add_item(self):
+        """
+        Adds a new entry of item with expiry date and its quantity to the selected
+        inventory list, this method includes validation of the item name, expiry date
+        and quantity and then makes it into a dataframe and concatenates it into the
+        inventory list dataframe
+        """
         # item name input processing
         while True:
             item_name = input("What is the name of the item? ").strip().title()
@@ -180,7 +185,7 @@ class Inventory:
         # item expiry date input processing
         while True:
             try:
-                item_expiry_date = input(
+                item_expiry_date: str | datetime.date = input(
                     "What is the expiry date of the item?\n\nInput Date YYYY-MM-DD or YYYY-MM: "
                 ).strip()
                 # regex for validating dates to be later than year 2023, capturing year, month, and day data
@@ -224,7 +229,7 @@ class Inventory:
                 continue
         # item quantity processing
         while True:
-            item_count = input(
+            item_count: str | int = input(
                 f"How many '{item_name}' item do you want to add to {self.inv_name}? "
             ).strip()
             # max item should be 999
@@ -252,59 +257,135 @@ class Inventory:
         for i in range(len(items)):
             if item_name == items[i] and item_expiry_date == dates[i]:
                 item_already_exists = True
-                loading_notices(f"item '{item_name}' with expiry date '{item_expiry_date}' already exists", 
-                                "input quantity will be added...")
+                loading_notices(
+                    f"item '{item_name}' with expiry date '{item_expiry_date}' already exists",
+                    "input quantity will be added...",
+                )
                 # Add the quantity to the existing quantity
-                self.dataframe.at[i,"Quantity"] = self.dataframe.at[i, "Quantity"] + item_count
+                self.dataframe.at[i, "Quantity"] += item_count
                 break
         if item_already_exists == False:
-            # Add the input item into the inventory dataframe
-            self.dataframe = pd.concat(
+            # Item to be added initialized as a dataframe
+            item_to_add = pd.DataFrame(
                 [
-                    self.dataframe, 
-                    pd.DataFrame([{"Item":item_name, "Expiry Date":item_expiry_date, "Quantity":item_count}])
-                    ],
-                ignore_index=True)
+                    {
+                        "Item": item_name,
+                        "Expiry Date": item_expiry_date,
+                        "Quantity": item_count,
+                    }
+                ]
+            )
+            # Concatenate the "item to be added" dateframe into the inventory dataframe
+            self.dataframe = pd.concat(
+                [self.dataframe, item_to_add],
+                ignore_index=True,
+            )
         # Save current dataframe to the csv file
-        self.dataframe.to_csv(path_or_buf=f"./inventories/{self.inv_name}.csv", mode="w", index=False)
+        self.dataframe.to_csv(
+            path_or_buf=f"./inventories/{self.inv_name}.csv", mode="w", index=False
+        )
         # Addition of item done, returns to current inventory menu
         loading_notices("item added!", "returning to inventory menu...")
         return "Inventory Menu"
 
     def remove_item(self):
-        # TODO select item number from the inventory
+        """
+        Removes an item by specifying the item number listed in the UI, prompts
+        the user for quantity to be removed and deducts it to the existing quantity
+        in the inventory. If the user inputs an integer that is equal to the
+        quantity listed in the inventory, it removes the whole item entry
+        """
+        # Select item number from the inventory
         while True:
-            item_to_destroy = input("Type the Item Number to Remove/Reduce: ").strip()
-            if re.search(r"^\d+$", item_to_destroy):
-                ...
-            break
-        # TODO ask user for input for quantity to be removed, and verify if input is a valid integer
-        while True:
-            item_number_to_destroy = input(
-                f"How many '{item_to_destroy}' item do you want to remove from {self.inv_name}? "
-            ).strip()
-            if re.search(r"^\d{0,2}[1-9]$", item_number_to_destroy):
-                item_number_to_destroy = int(item_number_to_destroy)
-                confirm_item_to_destroy = input(
-                    f'Confirm Item to be Removed "{item_number_to_destroy}"?\n\n[Y/N]:'
-                ).lower()
-                match confirm_item_to_destroy:
-                    case "y":
-                        break
-                    case "n":
-                        continue
-                    case _:
-                        print("Invalid input, Y or N only")
-                        continue
-            else:
-                print("Invalid quantity, input a number more than 0 but not more than the item quantity")
+            try:
+                item_to_destroy = input(
+                    "Type the Item Number to Remove/Reduce: "
+                ).strip()
+                if re.search(r"^\d+$", item_to_destroy) and 0 <= int(
+                    item_to_destroy
+                ) < len(self.storage):
+                    item_to_destroy = int(item_to_destroy)
+                    break
+                else:
+                    raise ValueError(
+                        "Invalid quantity, please input a valid item number"
+                    )
+            except (NameError, ValueError):
+                print("Invalid quantity, please input a valid item number")
                 continue
-        # TODO subtract the quantity from the item
-        # TODO if the item yields to 0, remove the item from the .csv file
-        WIP()
+        item_index = int(item_to_destroy) - 1
+        item_to_destroy = self.storage[item_to_destroy]
+
+        # Ask user for input for quantity to be removed, and verify if input is a valid integer
+        while True:
+            loading_notices(
+                f"{item_to_destroy[0]} has currently '{item_to_destroy[2]}' items in stock".upper()
+            )
+            item_number_to_destroy: str | int = input(
+                f"How many '{item_to_destroy[0]}' item do you want to remove from '{self.inv_name}'? "
+            ).strip()
+            if re.search(r"^\d{0,2}[1-9]*$", item_number_to_destroy) and 0 < int(
+                item_number_to_destroy
+            ) <= int(item_to_destroy[2]):
+                item_number_to_destroy = int(item_number_to_destroy)
+                # Subtract the quantity from the item and if the item yields to 0, remove the item completely
+                # Subtract items only if the items to remove are less than the items in stock
+                if item_number_to_destroy != int(item_to_destroy[2]):
+                    confirm_item_to_destroy = input(
+                        f"Confirm to remove '{item_number_to_destroy}' out of '{item_to_destroy[2]}' stock(s) of '{item_to_destroy[0]}'?\n\n[Y/N]: "
+                    ).lower()
+                    match confirm_item_to_destroy:
+                        case "y":
+                            self.dataframe.at[item_index, "Quantity"] -= int(
+                                item_number_to_destroy
+                            )
+                            loading_notices(
+                                f"removed {item_number_to_destroy} out of {item_to_destroy[2]} {item_to_destroy[0]} items successful!",
+                                "returning to inventory menu...",
+                            )
+                            break
+                        case "n":
+                            continue
+                        case _:
+                            print("Invalid input, Y or N only")
+                            continue
+                # Remove item completely from the inventory
+                elif item_number_to_destroy == int(item_to_destroy[2]):
+                    confirm_item_to_destroy = input(
+                        f"Confirm to remove all stock of '{item_to_destroy[0]}'?\n\n[Y/N]: "
+                    ).lower()
+                    match confirm_item_to_destroy:
+                        case "y":
+                            self.dataframe = self.dataframe.drop(index=item_index)
+                            self.dataframe = self.dataframe.reset_index(drop=True)
+                            loading_notices(
+                                f"removal of {item_to_destroy[0]} from the list successful!",
+                                "returning to inventory menu...",
+                            )
+                            break
+                        case "n":
+                            continue
+                        case _:
+                            print("Invalid input, Y or N only")
+                            continue
+            else:
+                print(
+                    "Invalid quantity, input a number more than 0 but not more than the item quantity"
+                )
+                continue
+        # Save current dataframe to the csv file after removal/reduction of items
+        print(self.dataframe)
+        self.dataframe.to_csv(
+            path_or_buf=f"./inventories/{self.inv_name}.csv",
+            mode="w",
+            index=False,
+        )
         return "Inventory Menu"
 
     def export_pdf(self):
+        """
+        Exports the selected inventory list as PDF using FPDF library
+        """
         while True:
             confirm_create_pdf: str = (
                 input(f"Do you want to export {self.inv_name.upper()} as PDF? [Y/N]: ")
@@ -331,6 +412,9 @@ class Inventory:
                     continue
 
     def delete_inventory(self):
+        """
+        Deletes the selected inventory using delete_csv_file() function
+        """
         while True:
             confirm_delete: str = (
                 input(
