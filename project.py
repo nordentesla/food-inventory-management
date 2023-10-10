@@ -591,11 +591,8 @@ def main():
                         the requirements of Harvard University's
                         CS50P final project.
 
-                        See ReadMe for more information:
+                        See GitHub repository site for more information and video demo:
                         https://github.com/nordentesla/food-inventory-management
-
-                        See Video Demo:
-                        https://www.youtube.com/watch?v=3V-wHjtP2lA
                         """
 
                     try:

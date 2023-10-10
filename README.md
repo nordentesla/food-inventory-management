@@ -4,7 +4,7 @@ Created by nordentesla (Jose Nichole C. Galenzoga)
 
 ## Video Demo
 
-[Video Link: YouTube - Food Inventory Management: (A CS50P Project)](https://www.youtube.com/watch?v=3V-wHjtP2lA)
+[Video Link: YouTube - Food Inventory Management: (A CS50P Project)](https://youtu.be/mAvYRrpPL_Y)
 
 ## Description
 
