@@ -593,6 +593,9 @@ def main():
 
                         See ReadMe for more information:
                         https://github.com/nordentesla/food-inventory-management
+
+                        See Video Demo:
+                        https://www.youtube.com/watch?v=3V-wHjtP2lA
                         """
 
                     try:

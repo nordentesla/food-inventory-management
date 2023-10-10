@@ -1,10 +1,10 @@
 # Food Inventory Management
 
-Created by nordentesla
+Created by nordentesla (Jose Nichole C. Galenzoga)
 
 ## Video Demo
 
-**!!! UNDER CONSTRUCTION !!!**
+[Video Link: YouTube - Food Inventory Management: (A CS50P Project)](https://www.youtube.com/watch?v=3V-wHjtP2lA)
 
 ## Description
 
