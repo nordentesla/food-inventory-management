@@ -11,6 +11,7 @@ Created by nordentesla (Jose Nichole C. Galenzoga)
 The program is called **Food Inventory Management**.
 
 It is a program that is used to manage food inventory in the household.
+It uses a flat-file database (CSV file) to store information.
 
 ### Features
 
